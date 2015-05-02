@@ -1,0 +1,24 @@
+Apply the following project settings for both Debug and Release Mode
+
+Debug->Options and Settings
+
+Debugging->Symbols
+click on folder icon
+type https://msdl.microsoft.com/download/symbols and check
+Cache symbol directory choose any local directory
+Automatically load symbols for All modules, unless excluded
+click ok
+
+Project Properties
+
+Configuration Properties->General
+Use of MFC = Use Standard Windows Libraries
+Use of ATL = Not Using ATL
+Common Language Runtime Support = Common Language Runtime Support (/clr)
+Whole Program Optimization = No Whole Program Optimization
+
+C/C++->General
+Common Language Runtime Support = Common Language Runtime Support (/clr)
+
+Linker->Input
+Force Symbol References = __DllMainCRTStartup@12
