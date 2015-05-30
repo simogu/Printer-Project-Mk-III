@@ -484,6 +484,17 @@ namespace sPrintManager {
 				 this->label3->Text = comName;
 
 	}
+
+	private: void controlJobs(int action)
+	{
+		for(int i = 0; i<listView1->SelectedItems->Count; i++)
+		{
+			string s;
+			MarshalString(listView1->Items[listView1->SelectedIndices[i]]->SubItems[0]->Text,s);	
+			this->_printMgr->startJob(curPrinter, atoi(s.c_str()),action);
+		}
+
+	}
 	
 	private: System::Void listView1_ColumnClick(System::Object^  sender, System::Windows::Forms::ColumnClickEventArgs^  e) {
 				 listView1->Sort();
@@ -517,6 +528,21 @@ namespace sPrintManager {
 				{
 					_printMgr->UnpausePrinter(curPrinter);
 				}
+
+				if (e->KeyCode == Keys::F3)
+				{
+					controlJobs(1);
+				}
+
+				if (e->KeyCode == Keys::F4)
+				{
+					controlJobs(2);
+				}
+
+				if (e->KeyCode == Keys::F5)
+				{
+					controlJobs(4);
+				}
 					
 			 }
 
@@ -537,6 +563,7 @@ namespace sPrintManager {
 						 cout<<"test "<<j<<endl;
 					 }*/
 
+					 //deleting jobs doesn't use controlJob method because it starts from last and removes entries
 					 for(int i =listView1->SelectedItems->Count-1; i>=0 ; i--)
 					 {
 						
@@ -732,7 +759,7 @@ private: System::Void MyTimer_Tick(System::Object^  sender, System::EventArgs^  
 				stringstream s;
 				s<<pStatus;
 
-				if(pStatus.compare("PAUSED")==0)
+				if(pStatus.compare("PAUSED")==0) 
 				{
 					this->listView1->BackColor = System::Drawing::Color::LightGray;
 				}
@@ -863,37 +890,21 @@ private: System::Void button3_Click(System::Object^  sender, System::EventArgs^ 
 private: System::Void button2_Click(System::Object^  sender, System::EventArgs^  e) {
 			 
 			 listView1->Focus();
-			 
-			 for(int i = 0; i<listView1->SelectedItems->Count; i++)
-			 {
-				 string s;
-				 MarshalString(listView1->Items[listView1->SelectedIndices[i]]->SubItems[0]->Text,s);	
-				 this->_printMgr->startJob(curPrinter, atoi(s.c_str()),JOB_CONTROL_PAUSE);
-			 }
+			controlJobs(1);
 		 }
 		 //Resume Jobs
 private: System::Void button1_Click(System::Object^  sender, System::EventArgs^  e) {
 
 			 listView1->Focus();
 
-			 for(int i = 0; i<listView1->SelectedItems->Count; i++)
-			 {
-				 string s;
-				 MarshalString(listView1->Items[listView1->SelectedIndices[i]]->SubItems[0]->Text,s);	
-				 this->_printMgr->startJob(curPrinter, atoi(s.c_str()),JOB_CONTROL_RESUME);
-			 }
+			 controlJobs(2);
 		 }
 		 //Restart Jobs
 private: System::Void button5_Click(System::Object^  sender, System::EventArgs^  e) {
 			 
 			 listView1->Focus();
 
-			 for(int i = 0; i<listView1->SelectedItems->Count; i++)
-			 {
-				 string s;
-				 MarshalString(listView1->Items[listView1->SelectedIndices[i]]->SubItems[0]->Text,s);	
-				 this->_printMgr->startJob(curPrinter, atoi(s.c_str()),JOB_CONTROL_RESTART);
-			 }
+			controlJobs(4);
 		 }
 
 };
