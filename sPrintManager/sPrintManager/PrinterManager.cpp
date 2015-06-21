@@ -186,9 +186,6 @@ bool PrinterManager::FetchJobsFromPrinter(LPTSTR szPrinterName, std::vector<Prin
 				return FALSE;
 		}
 
-		
-
-
 		if (dwReturned > 0) 
 		{
 				for(unsigned int i=0; i<dwReturned; i++)

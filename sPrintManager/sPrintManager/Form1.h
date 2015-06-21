@@ -5,6 +5,8 @@
 #include <iostream>
 #include "confirmDeletePopup.h"
 #include "PrinterManager.h"
+#include "FormController.h"
+
 
 using namespace std; 
 
@@ -31,45 +33,36 @@ namespace sPrintManager {
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
-		System::ComponentModel::Container ^components;
-		
-		PrinterManager* _printMgr;
-		int numOfPrinters;
-
-		bool printerSelected; //determines that there's a printer selected, begin jobFetch etc
+		System::ComponentModel::Container ^components;	
+		FormController* controller;
 
 	
-		LPWSTR curPrinter; //current printer name in long pointer form
-		JOB_INFO_2 *pJobInfo; //placeholder for _printMgr use
-		
-		
-
 	public:
 		
-		System::String^ comName;
 		Form1(void)
 		{
-			 printerSelected = false;
-			
+			 //printerSelected = false;
+			 
+			 //setup UI
 			 InitializeComponent();
+
+			 //setup double buffer to remove flickering
 			 HWND hWnd = static_cast<HWND>(this->listView1->Handle.ToPointer());
 			 SendMessage(hWnd, LVM_SETEXTENDEDLISTVIEWSTYLE, LVS_EX_DOUBLEBUFFER, LVS_EX_DOUBLEBUFFER);
-			 InitializeLink();
-
-
-			//
-			//TODO: Add the constructor code here
-			//
+			 
+			//setup keyboard controls
 			this->KeyPreview = true;
 			this->KeyDown +=
 				gcnew KeyEventHandler(this, &Form1::Form1_KeyDown);
 			
-			
-
+			//setup timed loop
 			Timer^ MyTimer = gcnew Timer();
 			MyTimer->Interval = 500; // 45 mins
 			MyTimer->Tick += gcnew EventHandler(this,&Form1::MyTimer_Tick);
 			MyTimer->Start();
+
+			//setup link with controller and printer
+			InitializeLink();
 		}
 
 		
@@ -79,14 +72,14 @@ namespace sPrintManager {
 		/// </summary>
 		~Form1()
 		{
-			_printMgr->destroy();
-			delete _printMgr;
+			delete controller;
 
 			if (components)
 			{
 				delete components;
 			}
 		}
+	
 	private: System::Windows::Forms::ListView^  listView1;
 	private: System::Windows::Forms::Label^  label1;
 	private: System::Windows::Forms::Button^  button1;
@@ -118,10 +111,6 @@ namespace sPrintManager {
 
 
 	protected: 
-
-	
-
-		
 
 #pragma region Windows Form Designer generated code
 		/// <summary>
@@ -455,456 +444,254 @@ namespace sPrintManager {
 
 	private: void InitializeLink(){
 
-				 _printMgr = new PrinterManager();
-				 comName = gcnew String(getComputerName().c_str());
+		//intialize form controller
+		controller = new FormController();
 
-				 int numPrinter = 0;
-				 _printMgr->refreshList();
-				 numOfPrinters = _printMgr->getNumOfPrinters();
+		//get list of printer
+		vector<string> printerList = controller->getPrinterListEvent();
+		
+		//populate to dropdown list
+		for(int i=0;i<printerList.size();i++)
+		{
+			this->comboBox1->Items->Add(gcnew System::String(printerList.at(i).c_str()));
+		}
 
-				 //cout<<numOfPrinters<<endl;
-				 for ( int j=0; j < numOfPrinters; j++ ) {
+		//label number of local printers
+		stringstream s;
+		s<<printerList.size();
+		this->label5->Text = gcnew System::String(s.str().c_str());
 
-					 if(_printMgr->getPrinter(j).Attributes & PRINTER_ATTRIBUTE_SHARED && _printMgr->getPrinter(j).Attributes & PRINTER_ATTRIBUTE_LOCAL)
-					 {
-
-						 USES_CONVERSION;
-						 string printerName = W2A(_printMgr->getPrinter(j).pPrinterName);
-						 string printerShareName = W2A(_printMgr->getPrinter(j).pShareName);
-
-						 this->comboBox1->Items->Add(gcnew System::String(printerShareName.c_str()));
-						 numPrinter++;
-					 }
-				 }
-
-				 stringstream s;
-				 s<<numPrinter;
-				 this->label5->Text = gcnew System::String(s.str().c_str());
-
-				 this->label3->Text = comName;
+		//indicate connection
+		this->label3->Text = "This Computer";		
 
 	}
 
-	private: void controlJobs(int action)
+	private: vector<int> getSelectedJobs()
 	{
+		vector<int> selectedJobs;
 		for(int i = 0; i<listView1->SelectedItems->Count; i++)
 		{
 			string s;
 			MarshalString(listView1->Items[listView1->SelectedIndices[i]]->SubItems[0]->Text,s);	
-			this->_printMgr->startJob(curPrinter, atoi(s.c_str()),action);
+			selectedJobs.push_back(atoi(s.c_str()));
 		}
-
+		return selectedJobs;
 	}
 	
 	private: System::Void listView1_ColumnClick(System::Object^  sender, System::Windows::Forms::ColumnClickEventArgs^  e) {
-				 listView1->Sort();
-				 Console::WriteLine(L"test2");
-			 }
+		listView1->Sort();
+	}
 
 	private: System::Void Form1_KeyDown(System::Object^ sender, System::Windows::Forms::KeyEventArgs^ e){
 
-				if(e->KeyCode == Keys::Delete && listView1->SelectedItems->Count>0)
-				{
-					ShowMyDialogBox();
+		if(e->KeyCode == Keys::Delete && listView1->SelectedItems->Count>0)
+		{
+			ShowDeleteDialogBox();			
+		}
+				
+		if (e->KeyCode == Keys::A && e->Control)
+		{
+			cout<<"key"<<endl;
+			listView1->MultiSelect = true;
+			for (int i = 0;i<listView1->Items->Count;i++)
+			{
+				listView1->Items[i]->Selected = true;
+			}
+		}
+
+		if (e->KeyCode == Keys::F1)
+		{
+			controller->setPausePrinterEvent();
+		}
+
+		if (e->KeyCode == Keys::F2)
+		{
+			controller->setUnpausePrinterEvent();
+		}
+
+		if (e->KeyCode == Keys::F3)
+		{
+			controller->setControlJobEvent(getSelectedJobs(),1);
+		}
+
+		if (e->KeyCode == Keys::F4)
+		{
+			controller->setControlJobEvent(getSelectedJobs(),2);
+		}
+
+		if (e->KeyCode == Keys::F5)
+		{
+			controller->setControlJobEvent(getSelectedJobs(),4);
+		}
 					
-				}
-			
-				if (e->KeyCode == Keys::A && e->Control)
-				{
-					cout<<"key"<<endl;
-					listView1->MultiSelect = true;
-					for (int i = 0;i<listView1->Items->Count;i++)
-					{
-						listView1->Items[i]->Selected = true;
-					}
-				}
+	}
 
-				if (e->KeyCode == Keys::F1)
-				{
-					_printMgr->PausePrinter(curPrinter);
-				}
+			 
+	private: void ShowDeleteDialogBox()
+	{
+		confirmDeletePopup^ testDialog = gcnew confirmDeletePopup;
 
-				if (e->KeyCode == Keys::F2)
-				{
-					_printMgr->UnpausePrinter(curPrinter);
-				}
+		// Show testDialog as a modal dialog and determine if DialogResult = OK. 
+		if ( testDialog->ShowDialog( this ) == System::Windows::Forms::DialogResult::Yes )
+		{	
+			//set delete job event to controller
+			controller->setControlJobEvent(getSelectedJobs(),5);
 
-				if (e->KeyCode == Keys::F3)
-				{
-					controlJobs(1);
-				}
-
-				if (e->KeyCode == Keys::F4)
-				{
-					controlJobs(2);
-				}
-
-				if (e->KeyCode == Keys::F5)
-				{
-					controlJobs(4);
-				}
+			//remove selected entries;
+			for(int i =listView1->SelectedItems->Count-1; i>=0 ; i--)
+			{
+				string s;
+				MarshalString(listView1->Items[listView1->SelectedIndices[i]]->SubItems[0]->Text,s);	
+				listView1->Items->RemoveAt(listView1->SelectedIndices[i]);
+			}
 					
-			 }
+		}
+				
+		delete testDialog;
+	}
+				
+	private: void MarshalString ( String ^ s, string& os ) {
 
+		using namespace Runtime::InteropServices;
+		const char* chars = (const char*)(Marshal::StringToHGlobalAnsi(s)).ToPointer();
+		os = chars;
+		Marshal::FreeHGlobal(IntPtr((void*)chars));
+	}
+
+	private: System::Void listView1_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e) {
 			 
-			 void ShowMyDialogBox()
-			 {
-				 confirmDeletePopup^ testDialog = gcnew confirmDeletePopup;
+		//add up total pages from selected print jobs
+		int sum = 0;
+		for(int i = 0; i<listView1->SelectedItems->Count; i++)
+		{
+			string pages;
+			MarshalString(listView1->Items[listView1->SelectedIndices[i]]->SubItems[3]->Text,pages);
+			string copies;
+			MarshalString(listView1->Items[listView1->SelectedIndices[i]]->SubItems[4]->Text,copies);
 
-				 // Show testDialog as a modal dialog and determine if DialogResult = OK. 
-				 if ( testDialog->ShowDialog( this ) == System::Windows::Forms::DialogResult::Yes )
-				 {
-					 /*
-					 for(int i =0; i< listView1->SelectedItems->Count; i++)
-					 {
-						 string j;
+			int p = atoi (pages.c_str());
+			int c = atoi (copies.c_str());
 
-						 MarshalString(listView1->SelectedItems[i]->SubItems[1]->Text,j);						
-						 cout<<"test "<<j<<endl;
-					 }*/
-
-					 //deleting jobs doesn't use controlJob method because it starts from last and removes entries
-					 for(int i =listView1->SelectedItems->Count-1; i>=0 ; i--)
-					 {
-						
-						 string s;
-						 MarshalString(listView1->Items[listView1->SelectedIndices[i]]->SubItems[0]->Text,s);	
-						 this->_printMgr->startJob(curPrinter, atoi(s.c_str()),JOB_CONTROL_DELETE);
-						 listView1->Items->RemoveAt(listView1->SelectedIndices[i]);
-					 }
-					
-				 }
+			sum = sum + p*c;
 				
-				 delete testDialog;
-			 }
-
-			 void MarshalString ( String ^ s, string& os ) {
-				 using namespace Runtime::InteropServices;
-				 const char* chars =  
-					 (const char*)(Marshal::StringToHGlobalAnsi(s)).ToPointer();
-				 os = chars;
-				 Marshal::FreeHGlobal(IntPtr((void*)chars));
-			 }
-
-			 string getComputerName()
-			 {
-				 /*
-				 LPWSTR buffer;
-
-				 DWORD len = MAX_COMPUTERNAME_LENGTH + 1;
-				 if (GetComputerName(buffer, &len))
-				 {
-					 char cbuffer[MAX_COMPUTERNAME_LENGTH + 1];
-
-					 // First arg is the pointer to destination char, second arg is
-					 // the pointer to source wchar_t, last arg is the size of char buffer
-					 wcstombs(cbuffer, buffer , MAX_COMPUTERNAME_LENGTH + 1);
-					 return std::string(cbuffer, len);
-				 }
-				*/
-				 return "THIS COMPUTER";
-			 }
-
-			 string fetchPrinterStatus(int status)
-			 {
-				 if(status == 1)
-				 {
-					 return "PAUSED";
-				 }
-				 else if(status == 0)
-				 {
-					 return "READY";
-				 }
-				 else
-				 {
-					 return "OTHER/ERROR";
-				 }
-
-			 }
-
-			 string fetchJobStatus(int status)
-			 {
-				 if(status == 1)
-				 {
-					 return "Paused";
-				 }
-				 else if(status == 0)
-				 {
-					 return "OK";
-				 }
-				 else if(status == 9)
-				 {
-					 return "Paused Spooling";
-				 }
-				 else if(status == 8208)
-				 {
-					 return "Printing";
-				 }
-				 else if(status == 8209)
-				 {
-					 return "Paused Printing";
-				 }
-				 else if(status == 8212)
-				 {
-					 return "Deleting";
-				 }
-				 else if(status == 8213)
-				 {
-					 return "Paused Deleting";
-				 }
-				 else if(status == 128 || status == 129)
-				 {
-					 return "Printed";
-				 }
-				 else if(status == 4097 || status == 4096)
-				 {
-					 return "Error";
-				 }
-				 else
-				 {
-					 std::ostringstream stream;
-					 stream << status;
-
-					 return stream.str();
-				 }
-
-			 }
-			 template <typename T>
-			 string toString ( T Number )
-			 {
-				 ostringstream ss;
-				 ss << Number;
-				 return ss.str();
-			 }
-
-			 void refreshPrinterList()
-			 {
-				 _printMgr->refreshList();
-				 string currentPrinter;
-				 MarshalString(comboBox1->Text,currentPrinter);	
-				 this->curPrinter = _printMgr->getPrinter(currentPrinter).pPrinterName; //set the curPrinter for ease of use later
-			 }
-
-private: System::Void listView1_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e) {
+		}
 			 
-			 int sum = 0;
-			 for(int i = 0; i<listView1->SelectedItems->Count; i++)
-			 {
-				 string pages;
-				 MarshalString(listView1->Items[listView1->SelectedIndices[i]]->SubItems[3]->Text,pages);
-				 string copies;
-				 MarshalString(listView1->Items[listView1->SelectedIndices[i]]->SubItems[4]->Text,copies);
-
-				 int p = atoi (pages.c_str());
-				 int c = atoi (copies.c_str());
-
-				 sum = sum + p*c;
-				
-			 }
-			 
-			 stringstream ss;
-			 ss << sum;
-			 
-
-			 String^ totalPages = gcnew String(ss.str().c_str());
-			 this->label2->Text = totalPages;
-		 }
-
-
-
-private: System::Void MyTimer_Tick(System::Object^  sender, System::EventArgs^  e)
-		 {
-			 /*
-			
-			 cli::array<System::String^>^ newData = gcnew cli::array<System::String^>(2);
-			 int x = rand() % 50 + 1;
-
-			 stringstream ss;
-			 ss << x;
-			 newData[0] = gcnew String(ss.str().c_str());
-			 newData[1] = "12/11";
-
-			 String^ result = "0";
-
-
-			 listView1->Items->Add(result)->SubItems->AddRange(newData);
-			 */
-			 
-			 
-			 if(printerSelected)
-			 {
-				
-				 vector<int> prevSelected;
-				 for(int i = 0;i<this->listView1->SelectedItems->Count;i++)
-				 {
-					 prevSelected.push_back(listView1->SelectedIndices[i]);
-					 //cout<<listView1->SelectedIndices[i]<<endl;
-
-				 }
-				 
-			
-				 
-				 vector<PrintJob> allJobs; //container to capture jobs
-				 pJobInfo = new JOB_INFO_2;
-				
-				// _printMgr->refreshList();
-
-				 _printMgr->getPrinterJobs(curPrinter, pJobInfo, allJobs);
-
-				 string currentPrinter;
-				 MarshalString(comboBox1->Text,currentPrinter);
-
-				//set the printer status
-				string pStatus = fetchPrinterStatus(_printMgr->getPrinter(currentPrinter).Status);
-				stringstream s;
-				s<<pStatus;
-
-				if(pStatus.compare("PAUSED")==0) 
-				{
-					this->listView1->BackColor = System::Drawing::Color::LightGray;
-				}
-				else if(pStatus.compare("READY")==0)
-				{
-					this->listView1->BackColor = System::Drawing::Color::White;
-
-				}
-				this->label8->Text = gcnew System::String(s.str().c_str());
-				
-				
-				array< ListViewItem^ >^ items = gcnew array< ListViewItem^ >(allJobs.size());
-				int i = 0;
-				
-				for (vector<PrintJob>::iterator I = allJobs.begin(), E = allJobs.end();
-					I != E; ++I) {
-
-
-						cli::array<System::String^>^ newData = gcnew cli::array<System::String^>(8);
-						SYSTEMTIME Submitted = I->submitted;
-
-						USES_CONVERSION;
-						
-						string id = toString(I->jobID);
-						string username = I->user;
-						string document = I->document;
-						string jStatus = fetchJobStatus(I->status);
-						std::ostringstream stream;
-
-						stream << Submitted.wDay << '/' << Submitted.wMonth << '/' << Submitted.wYear;
-						string date = stream.str();
-						stream.str("");
-						stream << (Submitted.wHour+8)%(12) << ':' << Submitted.wMinute << ':' << Submitted.wSecond;
-						string time = stream.str();
-						if(Submitted.wHour+8>=12)
-						{
-							time+=" pm";
-						}
-						else
-						{
-							time+=" am";
-						}
-
-						string dateTime = date+" "+time;
-
-						stream.str("");
-						stream.setf( std::ios::fixed, std:: ios::floatfield ); // floatfield set to fixed
-						stream.precision(2);
-						stream << "fileSize:" <<double(I->size/1000.0) << "kb";
-
-						string fileSize = stream.str();
-						stream.str("");
-						
-						newData[0] =  gcnew String(document.c_str());
-						newData[1] =  gcnew String(username.c_str());
-						newData[2] =  gcnew String(toString(I->getTotalPages()).c_str());
-						newData[3] =  gcnew String(toString(I->copies).c_str());
-						newData[4] =  gcnew String(toString(I->getPagesPrinted()).c_str());
-						newData[5] =  gcnew String(jStatus.c_str());		
-						newData[6] =  gcnew String(fileSize.c_str());
-						newData[7] =  gcnew String(dateTime.c_str());
-										
-						items[i] = gcnew ListViewItem(gcnew String(id.c_str()));
-
-						items[i]->SubItems->AddRange(newData);
-
-						i++;
-						
-				}
-				
+		stringstream ss;
+		ss << sum;
 		
-				
+		//update the total pages label
+		String^ totalPages = gcnew String(ss.str().c_str());
+		this->label2->Text = totalPages;
+	}
 
-				listView1->Items->Clear();
-				listView1->Items->AddRange(items);
+	private: System::Void MyTimer_Tick(System::Object^  sender, System::EventArgs^  e)
+	{
 				
-				
-				allJobs.clear();
-				
-				
-				for(int i = 0;i<prevSelected.size();i++)
-				{
-					listView1->Items[prevSelected.at(i)]->Selected = true;
-				//	string s;
-					//MarshalString(listView1->Items[prevSelected.at(i)]->SubItems[0]->Text,s);
-					//cout<<"subitem:"<<s<<endl;
-				}
-		
-				refreshPrinterList();
+		//set the printer status and update listview color
+		string pStatus = controller->getPrinterStateEvent();
+		stringstream s;
+		s<<pStatus;
+
+		this->label8->Text = gcnew System::String(s.str().c_str());
+
+		if(pStatus.compare("PAUSED")==0) 
+		{
+			this->listView1->BackColor = System::Drawing::Color::LightGray;
+		}
+		else if(pStatus.compare("READY")==0)
+		{
+			this->listView1->BackColor = System::Drawing::Color::White;
+		}
 			
-			 }
-		
+		vector<int> prevSelected;
 
-		 }
+		//record previously selected list items
+		for(int i = 0;i<this->listView1->SelectedItems->Count;i++)
+		{
+			prevSelected.push_back(listView1->SelectedIndices[i]);
+		}
 
+		//get current printer jobs
+		vector<vector<string>> jobs = controller->getPrinterJobEvent();
+		array< ListViewItem^ >^ items = gcnew array< ListViewItem^ >(jobs.size());
+
+		for (int i=0;i<jobs.size();i++) {
+
+			cli::array<System::String^>^ newData = gcnew cli::array<System::String^>(8);
+			for(int j=0;j<jobs.at(i).size()-1;j++)
+			{	
+				newData[j] =  gcnew String(jobs.at(i).at(j+1).c_str());							
+			}
+			items[i] = gcnew ListViewItem(gcnew String(jobs.at(i).at(0).c_str()));
+			items[i]->SubItems->AddRange(newData);
+		}
+
+		//clear and repopulate listview
+		listView1->Items->Clear();
+		listView1->Items->AddRange(items);
+
+		//reselect previously selected items
+		for(int i = 0;i<prevSelected.size();i++)
+		{
+			listView1->Items[prevSelected.at(i)]->Selected = true;
+		}
+
+		//refresh current selected printer
+		string currentPrinter;
+		MarshalString(comboBox1->Text,currentPrinter);	
+		controller->refreshSelectedPrinterEvent(currentPrinter);
+
+	}
+		 //SELECT ALL JOBS BUTTON
 private: System::Void button6_Click(System::Object^  sender, System::EventArgs^  e) {
-
+			 
 			 listView1->MultiSelect = true;
 			 for (int i = 0;i<listView1->Items->Count;i++)
 			 {
-				 listView1->Items[i]->Selected = true;
+				listView1->Items[i]->Selected = true;
 			 }
-
 			 listView1->Focus();
 		 }
+
+		 //SELECT PRINTER DROP-DOWN
 private: System::Void comboBox1_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e) {
 
 			 listView1->Focus();
-			 string currentPrinter;
+			 string selectedPrinter;
 
-			 MarshalString(comboBox1->Text,currentPrinter);	
-			 this->curPrinter = _printMgr->getPrinter(currentPrinter).pPrinterName; //set the curPrinter for ease of use later
-			 printerSelected = true;
+			 MarshalString(comboBox1->Text,selectedPrinter);	
+			 controller->setCurrentPrinterEvent(selectedPrinter);
 
 		 }
-		 //PAUSE PRINTER
+
+		 //PAUSE PRINTER BUTTON
 private: System::Void button4_Click(System::Object^  sender, System::EventArgs^  e) {
-
-			 _printMgr->PausePrinter(curPrinter);	
+			 listView1->Focus();
+			 controller->setPausePrinterEvent();
 		 }
 
-		 //RESUME PRINTER
+		 //RESUME PRINTER BUTTON
 private: System::Void button3_Click(System::Object^  sender, System::EventArgs^  e) {
-
-			 _printMgr->UnpausePrinter(curPrinter);			  
-		 }
-		 //Pause Jobs
-private: System::Void button2_Click(System::Object^  sender, System::EventArgs^  e) {
-			 
 			 listView1->Focus();
-			controlJobs(1);
+			 controller->setUnpausePrinterEvent();		  
 		 }
-		 //Resume Jobs
+
+		 //PAUSE JOBS BUTTON
+private: System::Void button2_Click(System::Object^  sender, System::EventArgs^  e) {	 
+			 listView1->Focus();
+			 controller->setControlJobEvent(getSelectedJobs(),1);
+		 }
+
+		 //RESUME JOBS BUTTON
 private: System::Void button1_Click(System::Object^  sender, System::EventArgs^  e) {
-
 			 listView1->Focus();
-
-			 controlJobs(2);
+			 controller->setControlJobEvent(getSelectedJobs(),2);
 		 }
-		 //Restart Jobs
-private: System::Void button5_Click(System::Object^  sender, System::EventArgs^  e) {
-			 
-			 listView1->Focus();
 
-			controlJobs(4);
+		 //RESTART JOBS BUTTON
+private: System::Void button5_Click(System::Object^  sender, System::EventArgs^  e) {	 
+			 listView1->Focus();
+			 controller->setControlJobEvent(getSelectedJobs(),4);
 		 }
 
 };

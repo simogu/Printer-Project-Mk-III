@@ -54,6 +54,9 @@
     <ClCompile Include="ExcelXML.cpp">
       <Filter>Source Files\printManagement</Filter>
     </ClCompile>
+    <ClCompile Include="FormController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Form1.h">
@@ -88,6 +91,9 @@
     </ClInclude>
     <ClInclude Include="ThreadInfo.h">
       <Filter>Source Files\printManagement</Filter>
+    </ClInclude>
+    <ClInclude Include="FormController.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
