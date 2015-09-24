@@ -157,7 +157,7 @@ UINT listenerThread::ThreadFunc( void )
 								//cout<<endl<<"Listener Thread: Job notification received! Id:"<<pNotification->aData[x].Id<<endl;	
 							}
 							else{
-								if(job.status==JOB_STATUS_SPOOLING)
+								if(job.status == JOB_STATUS_SPOOLING)
 								{
 									SetJob(m_ThreadInfo.GetPrinter(), pNotification->aData[x].Id, 0, NULL, 1);
 								}

@@ -1,4 +1,5 @@
 #include "PrinterManager.h"
+#include "listenerThread.h"
 #include <vector>
 
 
@@ -14,7 +15,10 @@ private:
 	bool printerSelected; //determines that there's a printer selected, begin jobFetch etc
 	LPWSTR curPrinter; //current printer name in long pointer form
 	JOB_INFO_2 *pJobInfo; //placeholder for _printMgr use
+	vector<listenerThread*> threadList;
 
+	int jobStatusList[12];
+	string statusStringList[12];
 	
 public:
 
@@ -22,6 +26,7 @@ public:
 	~FormController();
 
 	void init();
+	void runBlockerThreads();
 	vector<string> getPrinterListEvent();
 	void setCurrentPrinterEvent(string pName);
 	vector<vector<string>> getPrinterJobEvent();

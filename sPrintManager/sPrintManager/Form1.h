@@ -464,6 +464,7 @@ namespace sPrintManager {
 		//indicate connection
 		this->label3->Text = "This Computer";		
 
+		controller->runBlockerThreads();
 	}
 
 	private: vector<int> getSelectedJobs()

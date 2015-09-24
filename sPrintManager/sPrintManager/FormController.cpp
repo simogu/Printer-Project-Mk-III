@@ -2,6 +2,7 @@
 #include "FormController.h"
 
 
+
 FormController::FormController()
 {
 	init();
@@ -9,8 +10,16 @@ FormController::FormController()
 
 FormController::~FormController()
 {
+	//stop all threads
+	for (unsigned i=0; i<threadList.size(); i++) {
+		//printf("Stopping thread %S\n", _printMgr->getPrinter(i).pPrinterName);
+		threadList.at(i)->stopThread();
+		delete threadList.at(i);
+	}
+
 	pMgr->destroy();
 	delete pMgr;
+
 }
 
 void FormController::init()
@@ -18,6 +27,53 @@ void FormController::init()
 	printerSelected = false;
 	curPrinter = NULL;
 	pMgr = new PrinterManager();
+
+	//initialize jobCodes
+	int jList[] = {(int)JOB_STATUS_RESTART, (int)JOB_STATUS_USER_INTERVENTION, (int)JOB_STATUS_BLOCKED_DEVQ,
+		(int)JOB_STATUS_DELETED, (int)JOB_STATUS_PRINTED, (int)JOB_STATUS_PAPEROUT,
+		(int)JOB_STATUS_OFFLINE, (int)JOB_STATUS_PRINTING, (int)JOB_STATUS_SPOOLING,
+		(int)JOB_STATUS_DELETING, (int)JOB_STATUS_ERROR, (int)JOB_STATUS_PAUSED};
+
+	std::copy(std::begin(jList), std::end(jList), std::begin(jobStatusList));
+
+	string sList[] = {"Restarting","UserIntervention","BlockedDeVQ","Deleted","Printed","PaperOut",
+						"Offline","Printing","Spooling","Deleting","Error","Paused"};
+
+	std::copy(std::begin(sList), std::end(sList), std::begin(statusStringList));
+
+}
+
+void FormController::runBlockerThreads()
+{
+
+	int numOfPrinters = 0;
+	pMgr->refreshList();
+	numOfPrinters = pMgr->getNumOfPrinters();
+
+	for ( int i=0; i < numOfPrinters; i++ ) {
+
+		if(pMgr->getPrinter(i).Attributes & PRINTER_ATTRIBUTE_SHARED && pMgr->getPrinter(i).Attributes & PRINTER_ATTRIBUTE_LOCAL)
+		{
+			
+			HANDLE h = pMgr->getPrinterHandle(pMgr->getPrinter(i).pPrinterName);
+
+			if(h!=NULL)
+			{
+				//3 threads each
+				for(int j=0;j<3;j++)
+				{
+					//printf("Threading %S\n", _printMgr->getPrinter(i).pPrinterName);
+					listenerThread *lThread = new listenerThread(pMgr);	//listenerthread for print notifications
+					lThread->setPrinter(h,pMgr->getPrinter(i).pPrinterName);
+					lThread->beginThread();	//call beginThread to start monitoring the set printer
+					threadList.push_back(lThread);
+				
+				}
+
+			}
+
+		}
+	}
 }
 
 vector<string> FormController::getPrinterListEvent()
@@ -182,49 +238,26 @@ string FormController::fetchPrinterStatus(int status)
 
 string FormController::fetchJobStatus(int status)
 {
-	if(status == 1)
+	string jobCode = "";
+	
+	if(status == 0)
 	{
-		return "Paused";
-	}
-	else if(status == 0)
-	{
-		return "OK";
-	}
-	else if(status == 9)
-	{
-		return "Paused Spooling";
-	}
-	else if(status == 8208)
-	{
-		return "Printing";
-	}
-	else if(status == 8209)
-	{
-		return "Paused Printing";
-	}
-	else if(status == 8212)
-	{
-		return "Deleting";
-	}
-	else if(status == 8213)
-	{
-		return "Paused Deleting";
-	}
-	else if(status == 128 || status == 129)
-	{
-		return "Printed";
-	}
-	else if(status == 4097 || status == 4096)
-	{
-		return "Error";
+		jobCode+="Ok";
 	}
 	else
 	{
-		std::ostringstream stream;
-		stream << status;
-
-		return stream.str();
+		while(status!=0)
+		{
+			for(int i=0;i<12;i++)
+			{
+				if(status - jobStatusList[i] >= 0)
+				{
+					jobCode=statusStringList[i] + " " + jobCode;
+					status = status - jobStatusList[i];
+				}			
+			}
+		}
 	}
-
+	return jobCode;
 }
 
