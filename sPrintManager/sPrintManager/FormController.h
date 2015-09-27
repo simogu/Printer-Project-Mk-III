@@ -1,7 +1,7 @@
 #include "PrinterManager.h"
 #include "listenerThread.h"
 #include <vector>
-
+#include <queue>
 
 //reminder: void/mark out obsolete functions in printMgr class after refactor and completion.
 
@@ -17,8 +17,13 @@ private:
 	JOB_INFO_2 *pJobInfo; //placeholder for _printMgr use
 	vector<listenerThread*> threadList;
 
-	int jobStatusList[12];
-	string statusStringList[12];
+	//for job code generation
+	int jobStatusList[15];
+	string statusStringList[15];
+
+	queue<int> jobQueue;
+	int currentJob;
+	
 	
 public:
 
