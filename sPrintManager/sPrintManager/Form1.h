@@ -35,14 +35,15 @@ namespace sPrintManager {
 		/// </summary>
 		System::ComponentModel::Container ^components;	
 		FormController* controller;
-
-	
+		vector<string>* currentJobs;
+		vector<int>* deletedJobs;
 	public:
 		
 		Form1(void)
 		{
 			 //printerSelected = false;
-			 
+			 currentJobs = new vector<string>();
+			 deletedJobs = new vector<int>();
 			 //setup UI
 			 InitializeComponent();
 
@@ -73,7 +74,10 @@ namespace sPrintManager {
 		~Form1()
 		{
 			delete controller;
-
+			currentJobs->clear();
+			delete currentJobs;
+			deletedJobs->clear();
+			delete deletedJobs;
 			if (components)
 			{
 				delete components;
@@ -542,8 +546,11 @@ namespace sPrintManager {
 			for(int i =listView1->SelectedItems->Count-1; i>=0 ; i--)
 			{
 				string s;
-				MarshalString(listView1->Items[listView1->SelectedIndices[i]]->SubItems[0]->Text,s);	
-				listView1->Items->RemoveAt(listView1->SelectedIndices[i]);
+				//MarshalString(listView1->Items[listView1->SelectedIndices[i]]->SubItems[0]->Text,s);	
+				deletedJobs->push_back(listView1->SelectedIndices[i]);
+				
+				//listView1->Items->RemoveAt(listView1->SelectedIndices[i]);
+				//currentJobs->erase(currentJobs->begin()+listView1->SelectedIndices[i]);
 			}
 					
 		}
@@ -603,41 +610,47 @@ namespace sPrintManager {
 		{
 			this->listView1->BackColor = System::Drawing::Color::White;
 		}
-			
-		vector<int> prevSelected;
-
-		//record previously selected list items
-		for(int i = 0;i<this->listView1->SelectedItems->Count;i++)
+		
+		//clear out deleted jobs
+		for(int i=0;i<deletedJobs->size();i++)
 		{
-			prevSelected.push_back(listView1->SelectedIndices[i]);
+			listView1->Items->RemoveAt(deletedJobs->at(i));
+			currentJobs->erase(currentJobs->begin()+deletedJobs->at(i));	
 		}
+		deletedJobs->clear();
 
 		//get current printer jobs
 		vector<vector<string>> jobs = controller->getPrinterJobEvent();
-		array< ListViewItem^ >^ items = gcnew array< ListViewItem^ >(jobs.size());
-
+	
 		for (int i=0;i<jobs.size();i++) {
-
-			cli::array<System::String^>^ newData = gcnew cli::array<System::String^>(8);
-			for(int j=0;j<jobs.at(i).size()-1;j++)
-			{	
-				newData[j] =  gcnew String(jobs.at(i).at(j+1).c_str());							
+			
+			int index =(std::find(currentJobs->begin(), currentJobs->end(), jobs.at(i).at(0)))- currentJobs->begin();
+			int size = currentJobs->size()-1;
+			
+			if(index>size)
+			{
+				cli::array<System::String^>^ newData = gcnew cli::array<System::String^>(8);
+			
+				for(int j=0;j<jobs.at(i).size()-1;j++)
+				{	
+					newData[j] =  gcnew String(jobs.at(i).at(j+1).c_str());							
+				}
+				ListViewItem^ newItem = gcnew ListViewItem(gcnew String(jobs.at(i).at(0).c_str()));
+				newItem->SubItems->AddRange(newData);
+				listView1->Items->Add(newItem);
+				currentJobs->push_back(jobs.at(i).at(0));
 			}
-			items[i] = gcnew ListViewItem(gcnew String(jobs.at(i).at(0).c_str()));
-			items[i]->SubItems->AddRange(newData);
-		}
-
-		//clear and repopulate listview
-		listView1->Items->Clear();
-		listView1->Items->AddRange(items);
-
-		//reselect previously selected items
-		for(int i = 0;i<prevSelected.size();i++)
-		{
-			listView1->Items[prevSelected.at(i)]->Selected = true;
-		}
-
+			else
+			{
+				//if(listView1->Items[index]->SubItems[0]->Text)
+				for(int j=2;j<8;j++)
+				{	
+					listView1->Items[index]->SubItems[j+1]->Text = gcnew String(jobs.at(i).at(j+1).c_str());							
+				}			
+			}	
+		}		
 		//refresh current selected printer
+		
 		string currentPrinter;
 		MarshalString(comboBox1->Text,currentPrinter);	
 		controller->refreshSelectedPrinterEvent(currentPrinter);
