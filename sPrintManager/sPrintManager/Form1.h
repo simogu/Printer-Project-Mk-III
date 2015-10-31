@@ -36,7 +36,9 @@ namespace sPrintManager {
 		System::ComponentModel::Container ^components;	
 		FormController* controller;
 		vector<string>* currentJobs;
-		vector<int>* deletedJobs;
+	private: System::Windows::Forms::CheckBox^  checkBox1;
+	private: System::Windows::Forms::Button^  button7;
+			 vector<int>* deletedJobs;
 	public:
 		
 		Form1(void)
@@ -151,6 +153,8 @@ namespace sPrintManager {
 			this->label4 = (gcnew System::Windows::Forms::Label());
 			this->label3 = (gcnew System::Windows::Forms::Label());
 			this->button6 = (gcnew System::Windows::Forms::Button());
+			this->checkBox1 = (gcnew System::Windows::Forms::CheckBox());
+			this->button7 = (gcnew System::Windows::Forms::Button());
 			this->panel1->SuspendLayout();
 			this->SuspendLayout();
 			// 
@@ -280,7 +284,7 @@ namespace sPrintManager {
 			this->button4->UseVisualStyleBackColor = true;
 			this->button4->Click += gcnew System::EventHandler(this, &Form1::button4_Click);
 			// 
-			// label2 //total pages
+			// label2
 			// 
 			this->label2->Anchor = System::Windows::Forms::AnchorStyles::None;
 			this->label2->BackColor = System::Drawing::SystemColors::ControlLightLight;
@@ -428,11 +432,34 @@ namespace sPrintManager {
 			this->button6->UseVisualStyleBackColor = true;
 			this->button6->Click += gcnew System::EventHandler(this, &Form1::button6_Click);
 			// 
+			// checkBox1
+			// 
+			this->checkBox1->AutoSize = true;
+			this->checkBox1->Location = System::Drawing::Point(191, 65);
+			this->checkBox1->Name = L"checkBox1";
+			this->checkBox1->Size = System::Drawing::Size(117, 17);
+			this->checkBox1->TabIndex = 10;
+			this->checkBox1->Text = L"Auto Pause Control";
+			this->checkBox1->UseVisualStyleBackColor = true;
+			this->checkBox1->CheckedChanged += gcnew System::EventHandler(this, &Form1::checkBox1_CheckedChanged);
+			// 
+			// button7
+			// 
+			this->button7->Location = System::Drawing::Point(850, 65);
+			this->button7->Name = L"button7";
+			this->button7->Size = System::Drawing::Size(100, 23);
+			this->button7->TabIndex = 11;
+			this->button7->Text = L"Flush Printer";
+			this->button7->UseVisualStyleBackColor = true;
+			this->button7->Click += gcnew System::EventHandler(this, &Form1::button7_Click);
+			// 
 			// Form1
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(971, 433);
+			this->Controls->Add(this->button7);
+			this->Controls->Add(this->checkBox1);
 			this->Controls->Add(this->button6);
 			this->Controls->Add(this->panel1);
 			this->Controls->Add(this->listView1);
@@ -441,6 +468,7 @@ namespace sPrintManager {
 			this->panel1->ResumeLayout(false);
 			this->panel1->PerformLayout();
 			this->ResumeLayout(false);
+			this->PerformLayout();
 
 		}
 		
@@ -539,8 +567,7 @@ namespace sPrintManager {
 		// Show testDialog as a modal dialog and determine if DialogResult = OK. 
 		if ( testDialog->ShowDialog( this ) == System::Windows::Forms::DialogResult::Yes )
 		{	
-			//set delete job event to controller
-			controller->setControlJobEvent(getSelectedJobs(),5);
+			
 
 			//remove selected entries;
 			for(int i =listView1->SelectedItems->Count-1; i>=0 ; i--)
@@ -552,6 +579,9 @@ namespace sPrintManager {
 				//listView1->Items->RemoveAt(listView1->SelectedIndices[i]);
 				//currentJobs->erase(currentJobs->begin()+listView1->SelectedIndices[i]);
 			}
+
+			//set delete job event to controller
+			controller->setControlJobEvent(getSelectedJobs(),5);
 					
 		}
 				
@@ -626,9 +656,11 @@ namespace sPrintManager {
 			
 			int index =(std::find(currentJobs->begin(), currentJobs->end(), jobs.at(i).at(0)))- currentJobs->begin();
 			int size = currentJobs->size()-1;
-			
+		
+			//if job's index is greater than size of job list, new job has come
 			if(index>size)
 			{
+				//add new item
 				cli::array<System::String^>^ newData = gcnew cli::array<System::String^>(8);
 			
 				for(int j=0;j<jobs.at(i).size()-1;j++)
@@ -638,6 +670,7 @@ namespace sPrintManager {
 				ListViewItem^ newItem = gcnew ListViewItem(gcnew String(jobs.at(i).at(0).c_str()));
 				newItem->SubItems->AddRange(newData);
 				listView1->Items->Add(newItem);
+				//push to currentjobs
 				currentJobs->push_back(jobs.at(i).at(0));
 			}
 			else
@@ -708,6 +741,13 @@ private: System::Void button5_Click(System::Object^  sender, System::EventArgs^ 
 			 controller->setControlJobEvent(getSelectedJobs(),4);
 		 }
 
+private: System::Void checkBox1_CheckedChanged(System::Object^  sender, System::EventArgs^  e) {
+		     controller->toggleAutoPauseControl(checkBox1->Checked);		
+		 }
+private: System::Void button7_Click(System::Object^  sender, System::EventArgs^  e) {
+			 //PRINTFLUSH
+			 system("printflush.bat");
+		 }
 };
 }
 

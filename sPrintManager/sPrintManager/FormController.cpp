@@ -24,6 +24,7 @@ FormController::~FormController()
 
 void FormController::init()
 {
+	autoPauseControl = false;
 	printerSelected = false;
 	curPrinter = NULL;
 	pMgr = new PrinterManager();
@@ -118,22 +119,24 @@ string FormController::toString ( T Number )
 	ss << Number;
 	return ss.str();
 }
+
 vector<vector<string>> FormController::getPrinterJobEvent()
 {	
 	vector<vector<string>> jobCollection;
 
-	//AUTOMODE
-	/*
-	if(jobQueue.size()>0)
+	if(autoPauseControl)
 	{
-		if(currentJob!=jobQueue.front())
+		if(jobQueue.size()>0)
 		{
-			currentJob = jobQueue.front();
-			cout<<"next to print: "<<currentJob<<endl;
-			setUnpausePrinterEvent();
-		}
+			if(currentJob!=jobQueue.front())
+			{
+				currentJob = jobQueue.front();
+				cout<<"next to print: "<<currentJob<<endl;
+				setUnpausePrinterEvent();
+			}
+		}	
 	}
-	bool jobFound = false;*/
+	bool jobFound = false;
 
 	if(printerSelected)
 	{
@@ -192,41 +195,43 @@ vector<vector<string>> FormController::getPrinterJobEvent()
 
 				jobCollection.push_back(jobDetails);
 
-				//AUTOMODE
-				/*
-				if(I->jobID==currentJob)
+				if(autoPauseControl)
 				{
-					jobFound = true;
-					if(jStatus.find("Printing") != std::string::npos) 
+					if(I->jobID==currentJob)
 					{
-						//consider case of paused printing
-						if(!jStatus.find("Paused") == std::string::npos)
+						jobFound = true;
+						if(jStatus.find("Printing") != std::string::npos) 
 						{
-							setPausePrinterEvent();
+							//consider case of paused printing
+							if(!jStatus.find("Paused") == std::string::npos)
+							{
+								setPausePrinterEvent();
+							}
 						}
-					}
-					else if(jStatus.find("Printed") != std::string::npos) 
-					{
-						jobQueue.pop();
-					}
+						else if(jStatus.find("Printed") != std::string::npos) 
+						{
+							jobQueue.pop();
+						}
 					
-				}	
-				*/
+					}	
+				}
 		}
 		
 		allJobs.clear();
 
-		//Error control, to be Tested
-		/*
-		if(!jobFound && jobQueue.size()>0)
+		if(autoPauseControl)
 		{
-			if(currentJob == jobQueue.front())
+			if(!jobFound && jobQueue.size()>0)
 			{
-				//if job is at top of queue, also current job and cannot be found in the list
-				//kick it.
-				jobQueue.pop();
+				if(currentJob == jobQueue.front())
+				{
+					//if job is at top of queue, also current job and cannot be found in the list
+					//kick it.
+					jobQueue.pop();
+				}
 			}
-		}*/
+		}
+		
 	}
 	
 	return jobCollection;
@@ -267,20 +272,16 @@ void FormController::setControlJobEvent(vector<int> jobList, int action)
 	{
 		pMgr->startJob(curPrinter,jobList.at(i), action);
 		
-		/*
-		//AUTOMODE
-		if(action==2)
+		if(autoPauseControl)
 		{
-			jobQueue.emplace(jobList.at(i));
-		}*/
-
+			if(action==2)
+			{
+				jobQueue.emplace(jobList.at(i));
+			}
+		}
 	}
-
-	
-
-
-
 }
+
 string FormController::fetchPrinterStatus(int status)
 {
 	if(status == 1)
@@ -313,12 +314,17 @@ string FormController::fetchJobStatus(int status)
 			{
 				if(status - jobStatusList[i] >= 0)
 				{
-					jobCode=statusStringList[i] + " " + jobCode;
+					jobCode = statusStringList[i] + " " + jobCode;
 					status = status - jobStatusList[i];
 				}			
 			}
 		}
 	}
 	return jobCode;
+}
+
+void FormController::toggleAutoPauseControl(bool toggle)
+{
+	autoPauseControl = toggle;
 }
 
