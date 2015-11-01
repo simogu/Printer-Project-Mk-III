@@ -205,14 +205,17 @@ vector<vector<string>> FormController::getPrinterJobEvent()
 							//consider case of paused printing
 							if(!jStatus.find("Paused") == std::string::npos)
 							{
-								setPausePrinterEvent();
+								//setPausePrinterEvent();
 							}
 						}
 						else if(jStatus.find("Printed") != std::string::npos) 
 						{
 							jobQueue.pop();
 						}
-					
+						else if(jStatus.find("Ok") != std::string::npos) 
+						{
+							setUnpausePrinterEvent();
+						}
 					}	
 				}
 		}
@@ -282,6 +285,15 @@ void FormController::setControlJobEvent(vector<int> jobList, int action)
 	}
 }
 
+void FormController::setJobQueueInitialList(vector<int> jobList)
+{
+	for(int i=0;i<jobList.size();i++)
+	{
+		jobQueue.emplace(jobList.at(i));
+	}
+
+}
+
 string FormController::fetchPrinterStatus(int status)
 {
 	if(status == 1)
@@ -326,5 +338,16 @@ string FormController::fetchJobStatus(int status)
 void FormController::toggleAutoPauseControl(bool toggle)
 {
 	autoPauseControl = toggle;
+
+	if(toggle==false)
+	{
+		while(jobQueue.size()>0)
+		{
+			jobQueue.pop();
+		}
+		currentJob = -1;
+	}
+	
+
 }
 

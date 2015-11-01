@@ -743,6 +743,23 @@ private: System::Void button5_Click(System::Object^  sender, System::EventArgs^ 
 
 private: System::Void checkBox1_CheckedChanged(System::Object^  sender, System::EventArgs^  e) {
 		     controller->toggleAutoPauseControl(checkBox1->Checked);		
+			 if(checkBox1->Checked)
+			 {
+				 vector<int> readyJobs;
+				 for(int i=0;i<listView1->Items->Count;i++)
+				 {	
+					 if(listView1->Items[i]->SubItems[6]->Text == "Ok")
+					 {
+						 string s;
+						 MarshalString(listView1->Items[i]->SubItems[0]->Text,s);
+						 int id = atoi(s.c_str());
+
+						 readyJobs.push_back(id);
+					 }
+				 }
+
+				 controller->setJobQueueInitialList(readyJobs);
+			 }
 		 }
 private: System::Void button7_Click(System::Object^  sender, System::EventArgs^  e) {
 			 //PRINTFLUSH

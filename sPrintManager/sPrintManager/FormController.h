@@ -42,6 +42,7 @@ public:
 	void setPausePrinterEvent();
 	void setUnpausePrinterEvent();
 	void setControlJobEvent(vector<int> jobList, int action);
+	void setJobQueueInitialList(vector<int> jobList);
 
 	string fetchPrinterStatus(int status);
 	string fetchJobStatus(int status);
