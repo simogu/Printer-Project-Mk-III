@@ -708,6 +708,8 @@ private: System::Void comboBox1_SelectedIndexChanged(System::Object^  sender, Sy
 
 			 MarshalString(comboBox1->Text,selectedPrinter);	
 			 controller->setCurrentPrinterEvent(selectedPrinter);
+			 checkBox1->Checked = false;
+			 controller->toggleAutoPauseControl(false);
 
 		 }
 
