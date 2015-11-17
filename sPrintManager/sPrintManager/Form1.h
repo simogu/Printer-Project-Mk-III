@@ -216,19 +216,19 @@ namespace sPrintManager {
 			// 
 			this->columnHeader7->Text = L"Status";
 			this->columnHeader7->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
-			this->columnHeader7->Width = 78;
+			this->columnHeader7->Width = 149;
 			// 
 			// columnHeader8
 			// 
 			this->columnHeader8->Text = L"File Size";
 			this->columnHeader8->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
-			this->columnHeader8->Width = 88;
+			this->columnHeader8->Width = 81;
 			// 
 			// columnHeader9
 			// 
 			this->columnHeader9->Text = L"Submitted At";
 			this->columnHeader9->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
-			this->columnHeader9->Width = 176;
+			this->columnHeader9->Width = 140;
 			// 
 			// label1
 			// 
@@ -435,7 +435,7 @@ namespace sPrintManager {
 			// checkBox1
 			// 
 			this->checkBox1->AutoSize = true;
-			this->checkBox1->Location = System::Drawing::Point(191, 65);
+			this->checkBox1->Location = System::Drawing::Point(195, 65);
 			this->checkBox1->Name = L"checkBox1";
 			this->checkBox1->Size = System::Drawing::Size(117, 17);
 			this->checkBox1->TabIndex = 10;
@@ -762,6 +762,7 @@ private: System::Void checkBox1_CheckedChanged(System::Object^  sender, System::
 
 				 controller->setJobQueueInitialList(readyJobs);
 			 }
+			
 		 }
 private: System::Void button7_Click(System::Object^  sender, System::EventArgs^  e) {
 			 //PRINTFLUSH

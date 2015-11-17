@@ -134,7 +134,12 @@ vector<vector<string>> FormController::getPrinterJobEvent()
 				cout<<"next to print: "<<currentJob<<endl;
 				setUnpausePrinterEvent();
 			}
-		}	
+		}
+		else
+		{
+			setPausePrinterEvent();
+		}
+		
 	}
 	bool jobFound = false;
 
@@ -208,11 +213,20 @@ vector<vector<string>> FormController::getPrinterJobEvent()
 								//setPausePrinterEvent();
 							}
 						}
+						
 						else if(jStatus.find("Printed") != std::string::npos) 
 						{
 							jobQueue.pop();
 						}
+						else if(jStatus.find("Complete") != std::string::npos) 
+						{
+							jobQueue.pop();
+						}
 						else if(jStatus.find("Ok") != std::string::npos) 
+						{
+							setUnpausePrinterEvent();
+						}
+						else if(jStatus.find("Restarting") != std::string::npos) 
 						{
 							setUnpausePrinterEvent();
 						}
