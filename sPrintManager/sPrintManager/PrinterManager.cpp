@@ -128,7 +128,11 @@ PRINTER_INFO_2 PrinterManager::getPrinter(string printerName)
 		{
 			USES_CONVERSION;
 			char* pBuffer = T2A(list[i].pPrinterName);
-			char* pBuffer2 = T2A(list[i].pShareName);
+			char* pBuffer2 ="";// T2A(list[i].pShareName);
+			if(list[i].pShareName!=NULL)
+			{
+				pBuffer2 = T2A(list[i].pShareName);
+			}
 			
 			if(printerName.compare(pBuffer)==0 || printerName.compare(pBuffer2)==0){
 					

@@ -12,7 +12,7 @@ int main(array<System::String ^> ^args)
 
 	// Beginning of Application
 
-	AllocConsole();
+	//AllocConsole();
 	freopen("CONOUT$", "w", stdout);
 
 	// Enabling Windows XP visual effects before any controls are created

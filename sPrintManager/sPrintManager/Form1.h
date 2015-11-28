@@ -40,10 +40,10 @@ namespace sPrintManager {
 	private: System::Windows::Forms::Button^  button7;
 			 vector<int>* deletedJobs;
 	public:
-		
+		bool printerSelected;
 		Form1(void)
 		{
-			 //printerSelected = false;
+			 printerSelected = false;
 			 currentJobs = new vector<string>();
 			 deletedJobs = new vector<int>();
 			 //setup UI
@@ -434,17 +434,21 @@ namespace sPrintManager {
 			// 
 			// checkBox1
 			// 
+			this->checkBox1->Anchor = System::Windows::Forms::AnchorStyles::Top;
 			this->checkBox1->AutoSize = true;
-			this->checkBox1->Location = System::Drawing::Point(195, 65);
+			this->checkBox1->Enabled = false;
+			this->checkBox1->Location = System::Drawing::Point(191, 69);
 			this->checkBox1->Name = L"checkBox1";
 			this->checkBox1->Size = System::Drawing::Size(117, 17);
 			this->checkBox1->TabIndex = 10;
 			this->checkBox1->Text = L"Auto Pause Control";
 			this->checkBox1->UseVisualStyleBackColor = true;
+			this->checkBox1->Visible = false;
 			this->checkBox1->CheckedChanged += gcnew System::EventHandler(this, &Form1::checkBox1_CheckedChanged);
 			// 
 			// button7
 			// 
+			this->button7->Anchor = System::Windows::Forms::AnchorStyles::Top;
 			this->button7->Location = System::Drawing::Point(850, 65);
 			this->button7->Name = L"button7";
 			this->button7->Size = System::Drawing::Size(100, 23);
@@ -524,7 +528,7 @@ namespace sPrintManager {
 				
 		if (e->KeyCode == Keys::A && e->Control)
 		{
-			cout<<"key"<<endl;
+			
 			listView1->MultiSelect = true;
 			for (int i = 0;i<listView1->Items->Count;i++)
 			{
@@ -624,69 +628,76 @@ namespace sPrintManager {
 
 	private: System::Void MyTimer_Tick(System::Object^  sender, System::EventArgs^  e)
 	{
-				
-		//set the printer status and update listview color
-		string pStatus = controller->getPrinterStateEvent();
-		stringstream s;
-		s<<pStatus;
-
-		this->label8->Text = gcnew System::String(s.str().c_str());
-
-		if(pStatus.compare("PAUSED")==0) 
+		if(printerSelected)
 		{
-			this->listView1->BackColor = System::Drawing::Color::LightGray;
-		}
-		else if(pStatus.compare("READY")==0)
-		{
-			this->listView1->BackColor = System::Drawing::Color::White;
-		}
-		
-		//clear out deleted jobs
-		for(int i=0;i<deletedJobs->size();i++)
-		{
-			listView1->Items->RemoveAt(deletedJobs->at(i));
-			currentJobs->erase(currentJobs->begin()+deletedJobs->at(i));	
-		}
-		deletedJobs->clear();
+			//set the printer status and update listview color
+			string pStatus = controller->getPrinterStateEvent();
+			stringstream s;
+			s<<pStatus;
 
-		//get current printer jobs
-		vector<vector<string>> jobs = controller->getPrinterJobEvent();
-	
-		for (int i=0;i<jobs.size();i++) {
-			
-			int index =(std::find(currentJobs->begin(), currentJobs->end(), jobs.at(i).at(0)))- currentJobs->begin();
-			int size = currentJobs->size()-1;
-		
-			//if job's index is greater than size of job list, new job has come
-			if(index>size)
+			this->label8->Text = gcnew System::String(s.str().c_str());
+
+			if(pStatus.compare("PAUSED")==0) 
 			{
-				//add new item
-				cli::array<System::String^>^ newData = gcnew cli::array<System::String^>(8);
-			
-				for(int j=0;j<jobs.at(i).size()-1;j++)
-				{	
-					newData[j] =  gcnew String(jobs.at(i).at(j+1).c_str());							
-				}
-				ListViewItem^ newItem = gcnew ListViewItem(gcnew String(jobs.at(i).at(0).c_str()));
-				newItem->SubItems->AddRange(newData);
-				listView1->Items->Add(newItem);
-				//push to currentjobs
-				currentJobs->push_back(jobs.at(i).at(0));
+				this->listView1->BackColor = System::Drawing::Color::LightGray;
 			}
-			else
+			else if(pStatus.compare("READY")==0)
 			{
-				//if(listView1->Items[index]->SubItems[0]->Text)
-				for(int j=2;j<8;j++)
-				{	
-					listView1->Items[index]->SubItems[j+1]->Text = gcnew String(jobs.at(i).at(j+1).c_str());							
-				}			
-			}	
-		}		
-		//refresh current selected printer
+				this->listView1->BackColor = System::Drawing::Color::White;
+			}
+
+			//clear out deleted jobs
+			for(int i=0;i<deletedJobs->size();i++)
+			{
+				listView1->Items->RemoveAt(deletedJobs->at(i));
+				currentJobs->erase(currentJobs->begin()+deletedJobs->at(i));	
+			}
+			deletedJobs->clear();
+
+			//get current printer jobs
+			vector<vector<string>> jobs = controller->getPrinterJobEvent();
+
+			for (int i=0;i<jobs.size();i++) {
+
+				int index =(std::find(currentJobs->begin(), currentJobs->end(), jobs.at(i).at(0)))- currentJobs->begin();
+				int size = currentJobs->size()-1;
+
+				//if job's index is greater than size of job list, new job has come
+				if(index>size)
+				{
+					//add new item
+					cli::array<System::String^>^ newData = gcnew cli::array<System::String^>(8);
+
+					for(int j=0;j<jobs.at(i).size()-1;j++)
+					{	
+						newData[j] =  gcnew String(jobs.at(i).at(j+1).c_str());							
+					}
+					ListViewItem^ newItem = gcnew ListViewItem(gcnew String(jobs.at(i).at(0).c_str()));
+					newItem->SubItems->AddRange(newData);
+					listView1->Items->Add(newItem);
+					//push to currentjobs
+					currentJobs->push_back(jobs.at(i).at(0));
+				}
+				else
+				{
+					//if(listView1->Items[index]->SubItems[0]->Text)
+					for(int j=2;j<8;j++)
+					{	
+						if(listView1->Items->Count>0)
+						{
+							listView1->Items[index]->SubItems[j+1]->Text = gcnew String(jobs.at(i).at(j+1).c_str());	
+						}
+												
+					}			
+				}	
+			}		
+			//refresh current selected printer
+
+			string currentPrinter;
+			MarshalString(comboBox1->Text,currentPrinter);	
+			controller->refreshSelectedPrinterEvent(currentPrinter);
+		}
 		
-		string currentPrinter;
-		MarshalString(comboBox1->Text,currentPrinter);	
-		controller->refreshSelectedPrinterEvent(currentPrinter);
 
 	}
 		 //SELECT ALL JOBS BUTTON
@@ -702,11 +713,16 @@ private: System::Void button6_Click(System::Object^  sender, System::EventArgs^ 
 
 		 //SELECT PRINTER DROP-DOWN
 private: System::Void comboBox1_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e) {
-
+			 listView1->Items->Clear();
+			 currentJobs->clear();
 			 listView1->Focus();
 			 string selectedPrinter;
 
 			 MarshalString(comboBox1->Text,selectedPrinter);	
+			 if(selectedPrinter.length()>0)
+			 {
+				 printerSelected = true;
+			 }
 			 controller->setCurrentPrinterEvent(selectedPrinter);
 			 checkBox1->Checked = false;
 			 controller->toggleAutoPauseControl(false);
