@@ -24,7 +24,6 @@ FormController::~FormController()
 
 void FormController::init()
 {
-	autoPauseControl = false;
 	printerSelected = false;
 	curPrinter = NULL;
 	pMgr = new PrinterManager();
@@ -44,17 +43,17 @@ void FormController::init()
 
 	std::copy(std::begin(sList), std::end(sList), std::begin(statusStringList));
 
-	currentJob = -1;
+	
 
 }
 
 void FormController::runBlockerThreads()
 {
-
+	
 	int numOfPrinters = 0;
 	pMgr->refreshList();
 	numOfPrinters = pMgr->getNumOfPrinters();
-
+	
 	for ( int i=0; i < numOfPrinters; i++ ) {
 
 		if(pMgr->getPrinter(i).Attributes & PRINTER_ATTRIBUTE_SHARED && pMgr->getPrinter(i).Attributes & PRINTER_ATTRIBUTE_LOCAL)
@@ -79,6 +78,8 @@ void FormController::runBlockerThreads()
 
 		}
 	}
+	
+	
 }
 
 vector<string> FormController::getPrinterListEvent()
@@ -124,27 +125,12 @@ vector<vector<string>> FormController::getPrinterJobEvent()
 {	
 	vector<vector<string>> jobCollection;
 
-	if(autoPauseControl)
-	{
-		if(jobQueue.size()>0)
-		{
-			if(currentJob!=jobQueue.front())
-			{
-				currentJob = jobQueue.front();
-				cout<<"next to print: "<<currentJob<<endl;
-				setUnpausePrinterEvent();
-			}
-		}
-		else
-		{
-			setPausePrinterEvent();
-		}
-		
-	}
+	
 	bool jobFound = false;
 
 	if(printerSelected)
 	{
+		
 		vector<PrintJob> allJobs; //container to capture jobs
 		pJobInfo = new JOB_INFO_2;
 
@@ -199,56 +185,15 @@ vector<vector<string>> FormController::getPrinterJobEvent()
 				jobDetails.push_back(dateTime);
 
 				jobCollection.push_back(jobDetails);
-
-				if(autoPauseControl)
-				{
-					if(I->jobID==currentJob)
-					{
-						jobFound = true;
-						if(jStatus.find("Printing") != std::string::npos) 
-						{
-							//consider case of paused printing
-							if(!jStatus.find("Paused") == std::string::npos)
-							{
-								//setPausePrinterEvent();
-							}
-						}
-						
-						else if(jStatus.find("Printed") != std::string::npos) 
-						{
-							jobQueue.pop();
-						}
-						else if(jStatus.find("Complete") != std::string::npos) 
-						{
-							jobQueue.pop();
-						}
-						else if(jStatus.find("Ok") != std::string::npos) 
-						{
-							setUnpausePrinterEvent();
-						}
-						else if(jStatus.find("Restarting") != std::string::npos) 
-						{
-							setUnpausePrinterEvent();
-						}
-					}	
-				}
+	
+				
 		}
+		free(pJobInfo);
+		delete pJobInfo;
+
 		
 		allJobs.clear();
-
-		if(autoPauseControl)
-		{
-			if(!jobFound && jobQueue.size()>0)
-			{
-				if(currentJob == jobQueue.front())
-				{
-					//if job is at top of queue, also current job and cannot be found in the list
-					//kick it.
-					jobQueue.pop();
-				}
-			}
-		}
-		
+	
 	}
 	
 	return jobCollection;
@@ -288,25 +233,9 @@ void FormController::setControlJobEvent(vector<int> jobList, int action)
 	for(int i = 0; i < jobList.size(); i++)
 	{
 		pMgr->startJob(curPrinter,jobList.at(i), action);
-		
-		if(autoPauseControl)
-		{
-			if(action==2)
-			{
-				jobQueue.emplace(jobList.at(i));
-			}
-		}
 	}
 }
 
-void FormController::setJobQueueInitialList(vector<int> jobList)
-{
-	for(int i=0;i<jobList.size();i++)
-	{
-		jobQueue.emplace(jobList.at(i));
-	}
-
-}
 
 string FormController::fetchPrinterStatus(int status)
 {
@@ -349,19 +278,5 @@ string FormController::fetchJobStatus(int status)
 	return jobCode;
 }
 
-void FormController::toggleAutoPauseControl(bool toggle)
-{
-	autoPauseControl = toggle;
 
-	if(toggle==false)
-	{
-		while(jobQueue.size()>0)
-		{
-			jobQueue.pop();
-		}
-		currentJob = -1;
-	}
-	
-
-}
 

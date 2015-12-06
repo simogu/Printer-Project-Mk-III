@@ -36,7 +36,7 @@ namespace sPrintManager {
 		System::ComponentModel::Container ^components;	
 		FormController* controller;
 		vector<string>* currentJobs;
-	private: System::Windows::Forms::CheckBox^  checkBox1;
+	
 	private: System::Windows::Forms::Button^  button7;
 			 vector<int>* deletedJobs;
 	public:
@@ -153,7 +153,7 @@ namespace sPrintManager {
 			this->label4 = (gcnew System::Windows::Forms::Label());
 			this->label3 = (gcnew System::Windows::Forms::Label());
 			this->button6 = (gcnew System::Windows::Forms::Button());
-			this->checkBox1 = (gcnew System::Windows::Forms::CheckBox());
+			
 			this->button7 = (gcnew System::Windows::Forms::Button());
 			this->panel1->SuspendLayout();
 			this->SuspendLayout();
@@ -431,20 +431,7 @@ namespace sPrintManager {
 			this->button6->Text = L"Select All";
 			this->button6->UseVisualStyleBackColor = true;
 			this->button6->Click += gcnew System::EventHandler(this, &Form1::button6_Click);
-			// 
-			// checkBox1
-			// 
-			this->checkBox1->Anchor = System::Windows::Forms::AnchorStyles::Top;
-			this->checkBox1->AutoSize = true;
-			this->checkBox1->Enabled = false;
-			this->checkBox1->Location = System::Drawing::Point(191, 69);
-			this->checkBox1->Name = L"checkBox1";
-			this->checkBox1->Size = System::Drawing::Size(117, 17);
-			this->checkBox1->TabIndex = 10;
-			this->checkBox1->Text = L"Auto Pause Control";
-			this->checkBox1->UseVisualStyleBackColor = true;
-			this->checkBox1->Visible = false;
-			this->checkBox1->CheckedChanged += gcnew System::EventHandler(this, &Form1::checkBox1_CheckedChanged);
+			
 			// 
 			// button7
 			// 
@@ -463,7 +450,6 @@ namespace sPrintManager {
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(971, 433);
 			this->Controls->Add(this->button7);
-			this->Controls->Add(this->checkBox1);
 			this->Controls->Add(this->button6);
 			this->Controls->Add(this->panel1);
 			this->Controls->Add(this->listView1);
@@ -628,15 +614,21 @@ namespace sPrintManager {
 
 	private: System::Void MyTimer_Tick(System::Object^  sender, System::EventArgs^  e)
 	{
+		
+		if(GC::GetTotalMemory(NULL)>3000)
+		{
+			GC::Collect();
+		}
 		if(printerSelected)
 		{
 			//set the printer status and update listview color
+			
 			string pStatus = controller->getPrinterStateEvent();
 			stringstream s;
 			s<<pStatus;
 
 			this->label8->Text = gcnew System::String(s.str().c_str());
-
+			
 			if(pStatus.compare("PAUSED")==0) 
 			{
 				this->listView1->BackColor = System::Drawing::Color::LightGray;
@@ -645,7 +637,7 @@ namespace sPrintManager {
 			{
 				this->listView1->BackColor = System::Drawing::Color::White;
 			}
-
+			
 			//clear out deleted jobs
 			for(int i=0;i<deletedJobs->size();i++)
 			{
@@ -691,6 +683,9 @@ namespace sPrintManager {
 					}			
 				}	
 			}		
+
+			jobs.clear();
+			
 			//refresh current selected printer
 
 			string currentPrinter;
@@ -724,8 +719,8 @@ private: System::Void comboBox1_SelectedIndexChanged(System::Object^  sender, Sy
 				 printerSelected = true;
 			 }
 			 controller->setCurrentPrinterEvent(selectedPrinter);
-			 checkBox1->Checked = false;
-			 controller->toggleAutoPauseControl(false);
+			
+			
 
 		 }
 
@@ -759,27 +754,7 @@ private: System::Void button5_Click(System::Object^  sender, System::EventArgs^ 
 			 controller->setControlJobEvent(getSelectedJobs(),4);
 		 }
 
-private: System::Void checkBox1_CheckedChanged(System::Object^  sender, System::EventArgs^  e) {
-		     controller->toggleAutoPauseControl(checkBox1->Checked);		
-			 if(checkBox1->Checked)
-			 {
-				 vector<int> readyJobs;
-				 for(int i=0;i<listView1->Items->Count;i++)
-				 {	
-					 if(listView1->Items[i]->SubItems[6]->Text == "Ok")
-					 {
-						 string s;
-						 MarshalString(listView1->Items[i]->SubItems[0]->Text,s);
-						 int id = atoi(s.c_str());
 
-						 readyJobs.push_back(id);
-					 }
-				 }
-
-				 controller->setJobQueueInitialList(readyJobs);
-			 }
-			
-		 }
 private: System::Void button7_Click(System::Object^  sender, System::EventArgs^  e) {
 			 //PRINTFLUSH
 			 system("printflush.bat");

@@ -21,7 +21,13 @@ PrinterManager::~PrinterManager()
 
 void PrinterManager::refreshList() 
 {
-		
+		free(list);
+		boolean add =  false;
+
+		if(PrinterData.size()==0)
+		{
+			add = true;
+		}
 		try{
 			EnumPrinters( PRINTER_ENUM_LOCAL|PRINTER_ENUM_CONNECTIONS , NULL, Level, NULL, 0, &sz, &numOfPrinters );
 
@@ -32,16 +38,18 @@ void PrinterManager::refreshList()
 						free( list );
 						return;
 			}
-			PrinterHandles.clear();
-			PrinterData.clear();
+			
+			
 			//closing any printer handles left opened
 			//closePrinters();
 		
 			//creating HANDLES for each printer and opening them
-			std::map<LPTSTR, HANDLE>::iterator it = PrinterHandles.begin();
-			std::map<LPWSTR, PRINTER_INFO_2>::iterator it2 = PrinterData.begin();
-			for (unsigned int i=0; i<numOfPrinters; i++) 
+			if(add)
 			{
+				std::map<LPTSTR, HANDLE>::iterator it = PrinterHandles.begin();
+				std::map<LPWSTR, PRINTER_INFO_2>::iterator it2 = PrinterData.begin();
+				for (unsigned int i=0; i<numOfPrinters; i++) 
+				{
 					HANDLE hPrinter;
 					// You need a printer handle, open the printer
 
@@ -52,18 +60,19 @@ void PrinterManager::refreshList()
 					pd.pDatatype=NULL;
 					pd.pDevMode = NULL;
 
-				
+
 					if(list[i].Attributes & PRINTER_ATTRIBUTE_SHARED && list[i].Attributes & PRINTER_ATTRIBUTE_LOCAL)
 					{
 						if( !OpenPrinter( list[i].pPrinterName, &hPrinter, &pd) )
 							continue;
-					
+
 						PrinterHandles.insert( it, std::pair<LPTSTR, HANDLE>(list[i].pPrinterName, hPrinter) );
 						PrinterData.insert( it2, std::pair<LPWSTR, PRINTER_INFO_2>(list[i].pPrinterName, list[i]) );
-						
 					}			
 
+				}
 			}
+			
 			
 		}
 		catch(...)

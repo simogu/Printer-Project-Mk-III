@@ -21,10 +21,6 @@ private:
 	int jobStatusList[15];
 	string statusStringList[15];
 
-	bool autoPauseControl;
-	queue<int> jobQueue;
-	int currentJob;
-	
 	
 public:
 
@@ -32,7 +28,6 @@ public:
 	~FormController();
 
 	void init();
-	void toggleAutoPauseControl(bool toggle);
 	void runBlockerThreads();
 	vector<string> getPrinterListEvent();
 	void setCurrentPrinterEvent(string pName);
@@ -42,7 +37,6 @@ public:
 	void setPausePrinterEvent();
 	void setUnpausePrinterEvent();
 	void setControlJobEvent(vector<int> jobList, int action);
-	void setJobQueueInitialList(vector<int> jobList);
 
 	string fetchPrinterStatus(int status);
 	string fetchJobStatus(int status);

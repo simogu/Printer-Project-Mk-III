@@ -42,7 +42,6 @@ UINT listenerThread::ThreadFunc( void )
 {
 	PPRINTER_NOTIFY_INFO pNotification = NULL;
 
-
 	WORD JobFields[] = 
     {
         JOB_NOTIFY_FIELD_PRINTER_NAME,
