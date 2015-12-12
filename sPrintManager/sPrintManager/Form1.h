@@ -615,7 +615,7 @@ namespace sPrintManager {
 	private: System::Void MyTimer_Tick(System::Object^  sender, System::EventArgs^  e)
 	{
 		
-		if(GC::GetTotalMemory(NULL)>3000)
+		if(GC::GetTotalMemory(NULL)>30000)
 		{
 			GC::Collect();
 		}
