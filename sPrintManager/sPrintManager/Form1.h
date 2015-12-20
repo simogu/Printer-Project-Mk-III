@@ -4,6 +4,7 @@
 #include <sstream>
 #include <iostream>
 #include "confirmDeletePopup.h"
+#include "confirmFlushPrinter.h"
 #include "PrinterManager.h"
 #include "FormController.h"
 
@@ -554,11 +555,11 @@ namespace sPrintManager {
 	{
 		confirmDeletePopup^ testDialog = gcnew confirmDeletePopup;
 
+		testDialog->StartPosition = FormStartPosition::CenterScreen;
+
 		// Show testDialog as a modal dialog and determine if DialogResult = OK. 
 		if ( testDialog->ShowDialog( this ) == System::Windows::Forms::DialogResult::Yes )
 		{	
-			
-
 			//remove selected entries;
 			for(int i =listView1->SelectedItems->Count-1; i>=0 ; i--)
 			{
@@ -571,13 +572,27 @@ namespace sPrintManager {
 			}
 
 			//set delete job event to controller
-			controller->setControlJobEvent(getSelectedJobs(),5);
-					
+			controller->setControlJobEvent(getSelectedJobs(),5);				
 		}
 				
 		delete testDialog;
 	}
-				
+	
+	private: void ShowFlushPrinterDialogBox()
+	{
+		confirmFlushPrinter^ testDialog = gcnew confirmFlushPrinter;
+
+		testDialog->StartPosition = FormStartPosition::CenterScreen;
+
+		// Show testDialog as a modal dialog and determine if DialogResult = OK. 
+		if ( testDialog->ShowDialog( this ) == System::Windows::Forms::DialogResult::Yes )
+		{	
+			system("printflush.bat");
+		}
+
+		delete testDialog;
+		
+	}
 	private: void MarshalString ( String ^ s, string& os ) {
 
 		using namespace Runtime::InteropServices;
@@ -648,7 +663,7 @@ namespace sPrintManager {
 
 			//get current printer jobs
 			vector<vector<string>> jobs = controller->getPrinterJobEvent();
-
+			vector<string> jobIDs;
 			for (int i=0;i<jobs.size();i++) {
 
 				int index =(std::find(currentJobs->begin(), currentJobs->end(), jobs.at(i).at(0)))- currentJobs->begin();
@@ -682,8 +697,20 @@ namespace sPrintManager {
 												
 					}			
 				}	
+				jobIDs.push_back(jobs.at(i).at(0));
 			}		
+			
+			for(int i=0;i<currentJobs->size();i++)
+			{
 
+				if(find(jobIDs.begin(),jobIDs.end(),currentJobs->at(i))==jobIDs.end())
+				{
+					listView1->Items->RemoveAt(i);
+					currentJobs->erase(currentJobs->begin()+i);	
+
+				}
+			}
+			jobIDs.clear();
 			jobs.clear();
 			
 			//refresh current selected printer
@@ -757,7 +784,8 @@ private: System::Void button5_Click(System::Object^  sender, System::EventArgs^ 
 
 private: System::Void button7_Click(System::Object^  sender, System::EventArgs^  e) {
 			 //PRINTFLUSH
-			 system("printflush.bat");
+			 ShowFlushPrinterDialogBox();
+
 		 }
 };
 }

@@ -36,8 +36,8 @@ void FormController::init()
 		(int)JOB_STATUS_DELETING, (int)JOB_STATUS_ERROR, (int)JOB_STATUS_PAUSED};
 
 	std::copy(std::begin(jList), std::end(jList), std::begin(jobStatusList));
-
-	string sList[] = {"RenderingLocally","Retained","Complete","Restarting","UserIntervention",
+	//""=retained
+	string sList[] = {"RenderingLocally","","Complete","Restarting","UserIntervention",
 						"BlockedDeVQ","Deleted","Printed","PaperOut",
 						"Offline","Printing","Spooling","Deleting","Error","Paused"};
 
