@@ -188,11 +188,13 @@ vector<vector<string>> FormController::getPrinterJobEvent()
 	
 				
 		}
-		free(pJobInfo);
+
+		allJobs.clear();
+		//free(pJobInfo);
 		delete pJobInfo;
 
 		
-		allJobs.clear();
+		
 	
 	}
 	

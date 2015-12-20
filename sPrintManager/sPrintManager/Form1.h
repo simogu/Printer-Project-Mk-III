@@ -630,10 +630,7 @@ namespace sPrintManager {
 	private: System::Void MyTimer_Tick(System::Object^  sender, System::EventArgs^  e)
 	{
 		
-		if(GC::GetTotalMemory(NULL)>30000)
-		{
-			GC::Collect();
-		}
+		
 		if(printerSelected)
 		{
 			//set the printer status and update listview color
@@ -719,7 +716,11 @@ namespace sPrintManager {
 			MarshalString(comboBox1->Text,currentPrinter);	
 			controller->refreshSelectedPrinterEvent(currentPrinter);
 		}
-		
+
+		if(GC::GetTotalMemory(NULL)>30000)
+		{
+			GC::Collect();
+		}
 
 	}
 		 //SELECT ALL JOBS BUTTON
