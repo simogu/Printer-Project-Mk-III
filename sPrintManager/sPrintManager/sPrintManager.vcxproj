@@ -87,11 +87,13 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.ico" />
+    <None Include="MK-III.ico" />
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />
     <ClCompile Include="confirmDeletePopup.cpp" />
+    <ClCompile Include="confirmFlushPrinter.cpp" />
     <ClCompile Include="ExcelXML.cpp" />
     <ClCompile Include="FormController.cpp" />
     <ClCompile Include="listenerThread.cpp" />
@@ -109,6 +111,7 @@
     <ClInclude Include="confirmDeletePopup.h">
       <FileType>CppForm</FileType>
     </ClInclude>
+    <ClInclude Include="confirmFlushPrinter.h" />
     <ClInclude Include="ExcelXML.h" />
     <ClInclude Include="Form1.h">
       <FileType>CppForm</FileType>
@@ -124,16 +127,17 @@
     <ClInclude Include="ThreadInfo.h" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="app.rc" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="confirmDeletePopup.resx">
       <DependentUpon>confirmDeletePopup.h</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="confirmFlushPrinter.resx" />
     <EmbeddedResource Include="Form1.resX">
       <DependentUpon>Form1.h</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="app.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

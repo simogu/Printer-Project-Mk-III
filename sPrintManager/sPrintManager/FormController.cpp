@@ -216,7 +216,7 @@ string FormController::getPrinterStateEvent()
 
 void FormController::refreshSelectedPrinterEvent(string pName)
 {
-	pMgr->refreshList();
+	//pMgr->refreshList();
 	curPrinter = pMgr->getPrinter(pName).pPrinterName; 
 }
 

@@ -19,6 +19,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
+    <None Include="MK-III.ico">
+      <Filter>Resource Files</Filter>
+    </None>
     <None Include="app.ico">
       <Filter>Resource Files</Filter>
     </None>
@@ -39,12 +42,6 @@
     <ClCompile Include="listenerThread.cpp">
       <Filter>Source Files\printManagement</Filter>
     </ClCompile>
-    <ClCompile Include="Logger.cpp">
-      <Filter>Source Files\printManagement</Filter>
-    </ClCompile>
-    <ClCompile Include="loggerThread.cpp">
-      <Filter>Source Files\printManagement</Filter>
-    </ClCompile>
     <ClCompile Include="PrinterManager.cpp">
       <Filter>Source Files\printManagement</Filter>
     </ClCompile>
@@ -56,6 +53,15 @@
     </ClCompile>
     <ClCompile Include="FormController.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="loggerThread.cpp">
+      <Filter>Source Files\printManagement</Filter>
+    </ClCompile>
+    <ClCompile Include="Logger.cpp">
+      <Filter>Source Files\printManagement</Filter>
+    </ClCompile>
+    <ClCompile Include="confirmFlushPrinter.cpp">
+      <Filter>Header Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -77,12 +83,6 @@
     <ClInclude Include="listenerThread.h">
       <Filter>Source Files\printManagement</Filter>
     </ClInclude>
-    <ClInclude Include="Logger.h">
-      <Filter>Source Files\printManagement</Filter>
-    </ClInclude>
-    <ClInclude Include="loggerThread.h">
-      <Filter>Source Files\printManagement</Filter>
-    </ClInclude>
     <ClInclude Include="PrinterManager.h">
       <Filter>Source Files\printManagement</Filter>
     </ClInclude>
@@ -95,11 +95,15 @@
     <ClInclude Include="FormController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="app.rc">
-      <Filter>Resource Files</Filter>
-    </ResourceCompile>
+    <ClInclude Include="Logger.h">
+      <Filter>Source Files\printManagement</Filter>
+    </ClInclude>
+    <ClInclude Include="loggerThread.h">
+      <Filter>Source Files\printManagement</Filter>
+    </ClInclude>
+    <ClInclude Include="confirmFlushPrinter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Form1.resX">
@@ -108,5 +112,13 @@
     <EmbeddedResource Include="confirmDeletePopup.resx">
       <Filter>Resource Files</Filter>
     </EmbeddedResource>
+    <EmbeddedResource Include="confirmFlushPrinter.resx">
+      <Filter>Header Files</Filter>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="app.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

@@ -21,13 +21,13 @@ PrinterManager::~PrinterManager()
 
 void PrinterManager::refreshList() 
 {
-		free(list);
-		boolean add =  false;
+		//free(list);
+		/*boolean add =  false;
 
 		if(PrinterData.size()==0)
 		{
 			add = true;
-		}
+		}*/
 		try{
 			EnumPrinters( PRINTER_ENUM_LOCAL|PRINTER_ENUM_CONNECTIONS , NULL, Level, NULL, 0, &sz, &numOfPrinters );
 
@@ -44,8 +44,8 @@ void PrinterManager::refreshList()
 			//closePrinters();
 		
 			//creating HANDLES for each printer and opening them
-			if(add)
-			{
+			//if(add)
+			//{
 				std::map<LPTSTR, HANDLE>::iterator it = PrinterHandles.begin();
 				std::map<LPWSTR, PRINTER_INFO_2>::iterator it2 = PrinterData.begin();
 				for (unsigned int i=0; i<numOfPrinters; i++) 
@@ -60,18 +60,18 @@ void PrinterManager::refreshList()
 					pd.pDatatype=NULL;
 					pd.pDevMode = NULL;
 
+					
 
 					if(list[i].Attributes & PRINTER_ATTRIBUTE_SHARED && list[i].Attributes & PRINTER_ATTRIBUTE_LOCAL)
 					{
 						if( !OpenPrinter( list[i].pPrinterName, &hPrinter, &pd) )
 							continue;
-
+					
 						PrinterHandles.insert( it, std::pair<LPTSTR, HANDLE>(list[i].pPrinterName, hPrinter) );
 						PrinterData.insert( it2, std::pair<LPWSTR, PRINTER_INFO_2>(list[i].pPrinterName, list[i]) );
 					}			
-
 				}
-			}
+			//}
 			
 			
 		}
@@ -144,7 +144,8 @@ PRINTER_INFO_2 PrinterManager::getPrinter(string printerName)
 			}
 			
 			if(printerName.compare(pBuffer)==0 || printerName.compare(pBuffer2)==0){
-					
+				
+				EnumPrinters(PRINTER_ENUM_LOCAL|PRINTER_ENUM_CONNECTIONS , NULL, Level, (LPBYTE)list, sz, &sz, &numOfPrinters);
 				return list[i];
 			}
 		}
@@ -162,7 +163,7 @@ bool PrinterManager::FetchJobsFromPrinter(LPTSTR szPrinterName, std::vector<Prin
 {
 		std::map<LPTSTR, HANDLE>::iterator it = PrinterHandles.find(szPrinterName);
 		if (it == PrinterHandles.end()) {
-				return false;
+			return false;
 		}
 		HANDLE         hPrinter = it->second;
 		DWORD          dwNeeded, dwReturned;
@@ -181,6 +182,7 @@ bool PrinterManager::FetchJobsFromPrinter(LPTSTR szPrinterName, std::vector<Prin
 				{
 						return FALSE;
 				}
+
 		}
 
 		// Allocate enough memory for the JOB_INFO_2 structures plus
@@ -239,7 +241,9 @@ bool PrinterManager::getPrinterJobs(LPTSTR PrinterName, JOB_INFO_2 *pJobInfo, st
 				// It should have failed, but if it failed for any reason other
 				// than "not enough memory", you should bail out
 				if( GetLastError() != ERROR_INSUFFICIENT_BUFFER )
-						return false;
+				{	
+					return false;
+				}
 		}
 		
 		// Allocate memory size of dwNeeded for JOB_INFO_2 structures

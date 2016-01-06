@@ -31,3 +31,8 @@ echo Spooler has been restarted!
 echo.
 
 echo Step 4: Try printing again.
+
+
+taskkill /f /im sPrintManager.exe
+
+start sPrintManager.exe

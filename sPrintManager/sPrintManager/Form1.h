@@ -40,6 +40,7 @@ namespace sPrintManager {
 	
 	private: System::Windows::Forms::Button^  button7;
 			 vector<int>* deletedJobs;
+	private: System::Windows::Forms::PictureBox^  pictureBox1;
 	public:
 		bool printerSelected;
 		Form1(void)
@@ -126,6 +127,7 @@ namespace sPrintManager {
 		/// </summary>
 		void InitializeComponent(void)
 		{
+			System::ComponentModel::ComponentResourceManager^  resources = (gcnew System::ComponentModel::ComponentResourceManager(Form1::typeid));
 			this->listView1 = (gcnew System::Windows::Forms::ListView());
 			this->columnHeader1 = (gcnew System::Windows::Forms::ColumnHeader());
 			this->columnHeader2 = (gcnew System::Windows::Forms::ColumnHeader());
@@ -144,6 +146,7 @@ namespace sPrintManager {
 			this->label2 = (gcnew System::Windows::Forms::Label());
 			this->comboBox1 = (gcnew System::Windows::Forms::ComboBox());
 			this->panel1 = (gcnew System::Windows::Forms::Panel());
+			this->pictureBox1 = (gcnew System::Windows::Forms::PictureBox());
 			this->label10 = (gcnew System::Windows::Forms::Label());
 			this->button5 = (gcnew System::Windows::Forms::Button());
 			this->label9 = (gcnew System::Windows::Forms::Label());
@@ -154,9 +157,9 @@ namespace sPrintManager {
 			this->label4 = (gcnew System::Windows::Forms::Label());
 			this->label3 = (gcnew System::Windows::Forms::Label());
 			this->button6 = (gcnew System::Windows::Forms::Button());
-			
 			this->button7 = (gcnew System::Windows::Forms::Button());
 			this->panel1->SuspendLayout();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->pictureBox1))->BeginInit();
 			this->SuspendLayout();
 			// 
 			// listView1
@@ -171,7 +174,7 @@ namespace sPrintManager {
 			this->listView1->GridLines = true;
 			this->listView1->Location = System::Drawing::Point(0, 86);
 			this->listView1->Name = L"listView1";
-			this->listView1->Size = System::Drawing::Size(971, 347);
+			this->listView1->Size = System::Drawing::Size(1049, 347);
 			this->listView1->TabIndex = 0;
 			this->listView1->UseCompatibleStateImageBehavior = false;
 			this->listView1->View = System::Windows::Forms::View::Details;
@@ -229,13 +232,13 @@ namespace sPrintManager {
 			// 
 			this->columnHeader9->Text = L"Submitted At";
 			this->columnHeader9->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
-			this->columnHeader9->Width = 140;
+			this->columnHeader9->Width = 210;
 			// 
 			// label1
 			// 
 			this->label1->Anchor = System::Windows::Forms::AnchorStyles::None;
 			this->label1->AutoSize = true;
-			this->label1->Location = System::Drawing::Point(12, 8);
+			this->label1->Location = System::Drawing::Point(96, 8);
 			this->label1->Name = L"label1";
 			this->label1->Size = System::Drawing::Size(78, 13);
 			this->label1->TabIndex = 1;
@@ -244,7 +247,7 @@ namespace sPrintManager {
 			// button1
 			// 
 			this->button1->Anchor = System::Windows::Forms::AnchorStyles::None;
-			this->button1->Location = System::Drawing::Point(645, 34);
+			this->button1->Location = System::Drawing::Point(740, 34);
 			this->button1->Name = L"button1";
 			this->button1->Size = System::Drawing::Size(75, 23);
 			this->button1->TabIndex = 2;
@@ -255,7 +258,7 @@ namespace sPrintManager {
 			// button2
 			// 
 			this->button2->Anchor = System::Windows::Forms::AnchorStyles::None;
-			this->button2->Location = System::Drawing::Point(552, 34);
+			this->button2->Location = System::Drawing::Point(647, 34);
 			this->button2->Name = L"button2";
 			this->button2->Size = System::Drawing::Size(75, 23);
 			this->button2->TabIndex = 3;
@@ -266,7 +269,7 @@ namespace sPrintManager {
 			// button3
 			// 
 			this->button3->Anchor = System::Windows::Forms::AnchorStyles::None;
-			this->button3->Location = System::Drawing::Point(444, 33);
+			this->button3->Location = System::Drawing::Point(539, 33);
 			this->button3->Name = L"button3";
 			this->button3->Size = System::Drawing::Size(75, 23);
 			this->button3->TabIndex = 4;
@@ -277,7 +280,7 @@ namespace sPrintManager {
 			// button4
 			// 
 			this->button4->Anchor = System::Windows::Forms::AnchorStyles::None;
-			this->button4->Location = System::Drawing::Point(343, 33);
+			this->button4->Location = System::Drawing::Point(438, 33);
 			this->button4->Name = L"button4";
 			this->button4->Size = System::Drawing::Size(75, 23);
 			this->button4->TabIndex = 5;
@@ -290,7 +293,7 @@ namespace sPrintManager {
 			this->label2->Anchor = System::Windows::Forms::AnchorStyles::None;
 			this->label2->BackColor = System::Drawing::SystemColors::ControlLightLight;
 			this->label2->BorderStyle = System::Windows::Forms::BorderStyle::FixedSingle;
-			this->label2->Location = System::Drawing::Point(850, 30);
+			this->label2->Location = System::Drawing::Point(937, 30);
 			this->label2->Name = L"label2";
 			this->label2->Size = System::Drawing::Size(100, 30);
 			this->label2->TabIndex = 6;
@@ -303,7 +306,7 @@ namespace sPrintManager {
 			this->comboBox1->BackColor = System::Drawing::SystemColors::Info;
 			this->comboBox1->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
 			this->comboBox1->FormattingEnabled = true;
-			this->comboBox1->Location = System::Drawing::Point(191, 35);
+			this->comboBox1->Location = System::Drawing::Point(282, 34);
 			this->comboBox1->Name = L"comboBox1";
 			this->comboBox1->Size = System::Drawing::Size(121, 21);
 			this->comboBox1->TabIndex = 7;
@@ -313,6 +316,7 @@ namespace sPrintManager {
 			// 
 			this->panel1->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Left) 
 				| System::Windows::Forms::AnchorStyles::Right));
+			this->panel1->Controls->Add(this->pictureBox1);
 			this->panel1->Controls->Add(this->label10);
 			this->panel1->Controls->Add(this->button5);
 			this->panel1->Controls->Add(this->label9);
@@ -331,14 +335,26 @@ namespace sPrintManager {
 			this->panel1->Controls->Add(this->button4);
 			this->panel1->Location = System::Drawing::Point(0, -1);
 			this->panel1->Name = L"panel1";
-			this->panel1->Size = System::Drawing::Size(971, 68);
+			this->panel1->Size = System::Drawing::Size(1049, 68);
 			this->panel1->TabIndex = 8;
+			// 
+			// pictureBox1
+			// 
+			this->pictureBox1->Anchor = System::Windows::Forms::AnchorStyles::Top;
+			this->pictureBox1->BackgroundImage = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"pictureBox1.BackgroundImage")));
+			this->pictureBox1->BackgroundImageLayout = System::Windows::Forms::ImageLayout::None;
+			this->pictureBox1->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"pictureBox1.Image")));
+			this->pictureBox1->Location = System::Drawing::Point(13, 2);
+			this->pictureBox1->Name = L"pictureBox1";
+			this->pictureBox1->Size = System::Drawing::Size(63, 65);
+			this->pictureBox1->TabIndex = 17;
+			this->pictureBox1->TabStop = false;
 			// 
 			// label10
 			// 
 			this->label10->Anchor = System::Windows::Forms::AnchorStyles::None;
 			this->label10->AutoSize = true;
-			this->label10->Location = System::Drawing::Point(868, 8);
+			this->label10->Location = System::Drawing::Point(952, 7);
 			this->label10->Name = L"label10";
 			this->label10->Size = System::Drawing::Size(64, 13);
 			this->label10->TabIndex = 16;
@@ -347,7 +363,7 @@ namespace sPrintManager {
 			// button5
 			// 
 			this->button5->Anchor = System::Windows::Forms::AnchorStyles::None;
-			this->button5->Location = System::Drawing::Point(737, 34);
+			this->button5->Location = System::Drawing::Point(832, 34);
 			this->button5->Name = L"button5";
 			this->button5->Size = System::Drawing::Size(75, 23);
 			this->button5->TabIndex = 15;
@@ -359,7 +375,7 @@ namespace sPrintManager {
 			// 
 			this->label9->Anchor = System::Windows::Forms::AnchorStyles::None;
 			this->label9->AutoSize = true;
-			this->label9->Location = System::Drawing::Point(642, 8);
+			this->label9->Location = System::Drawing::Point(737, 8);
 			this->label9->Name = L"label9";
 			this->label9->Size = System::Drawing::Size(84, 13);
 			this->label9->TabIndex = 14;
@@ -369,7 +385,7 @@ namespace sPrintManager {
 			// 
 			this->label8->Anchor = System::Windows::Forms::AnchorStyles::None;
 			this->label8->AutoSize = true;
-			this->label8->Location = System::Drawing::Point(460, 7);
+			this->label8->Location = System::Drawing::Point(555, 7);
 			this->label8->Name = L"label8";
 			this->label8->Size = System::Drawing::Size(0, 13);
 			this->label8->TabIndex = 13;
@@ -378,7 +394,7 @@ namespace sPrintManager {
 			// 
 			this->label7->Anchor = System::Windows::Forms::AnchorStyles::None;
 			this->label7->AutoSize = true;
-			this->label7->Location = System::Drawing::Point(375, 7);
+			this->label7->Location = System::Drawing::Point(470, 7);
 			this->label7->Name = L"label7";
 			this->label7->Size = System::Drawing::Size(79, 13);
 			this->label7->TabIndex = 12;
@@ -388,7 +404,7 @@ namespace sPrintManager {
 			// 
 			this->label6->Anchor = System::Windows::Forms::AnchorStyles::None;
 			this->label6->AutoSize = true;
-			this->label6->Location = System::Drawing::Point(213, 7);
+			this->label6->Location = System::Drawing::Point(304, 7);
 			this->label6->Name = L"label6";
 			this->label6->Size = System::Drawing::Size(70, 13);
 			this->label6->TabIndex = 11;
@@ -398,7 +414,7 @@ namespace sPrintManager {
 			// 
 			this->label5->Anchor = System::Windows::Forms::AnchorStyles::None;
 			this->label5->AutoSize = true;
-			this->label5->Location = System::Drawing::Point(136, 39);
+			this->label5->Location = System::Drawing::Point(224, 38);
 			this->label5->Name = L"label5";
 			this->label5->Size = System::Drawing::Size(0, 13);
 			this->label5->TabIndex = 10;
@@ -407,7 +423,7 @@ namespace sPrintManager {
 			// 
 			this->label4->Anchor = System::Windows::Forms::AnchorStyles::None;
 			this->label4->AutoSize = true;
-			this->label4->Location = System::Drawing::Point(12, 39);
+			this->label4->Location = System::Drawing::Point(96, 37);
 			this->label4->Name = L"label4";
 			this->label4->Size = System::Drawing::Size(126, 13);
 			this->label4->TabIndex = 9;
@@ -417,7 +433,7 @@ namespace sPrintManager {
 			// 
 			this->label3->Anchor = System::Windows::Forms::AnchorStyles::None;
 			this->label3->AutoSize = true;
-			this->label3->Location = System::Drawing::Point(91, 8);
+			this->label3->Location = System::Drawing::Point(178, 8);
 			this->label3->Name = L"label3";
 			this->label3->Size = System::Drawing::Size(0, 13);
 			this->label3->TabIndex = 8;
@@ -432,12 +448,11 @@ namespace sPrintManager {
 			this->button6->Text = L"Select All";
 			this->button6->UseVisualStyleBackColor = true;
 			this->button6->Click += gcnew System::EventHandler(this, &Form1::button6_Click);
-			
 			// 
 			// button7
 			// 
 			this->button7->Anchor = System::Windows::Forms::AnchorStyles::Top;
-			this->button7->Location = System::Drawing::Point(850, 65);
+			this->button7->Location = System::Drawing::Point(937, 65);
 			this->button7->Name = L"button7";
 			this->button7->Size = System::Drawing::Size(100, 23);
 			this->button7->TabIndex = 11;
@@ -449,7 +464,7 @@ namespace sPrintManager {
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(971, 433);
+			this->ClientSize = System::Drawing::Size(1049, 433);
 			this->Controls->Add(this->button7);
 			this->Controls->Add(this->button6);
 			this->Controls->Add(this->panel1);
@@ -458,8 +473,8 @@ namespace sPrintManager {
 			this->Text = L"sPrint Mk-III";
 			this->panel1->ResumeLayout(false);
 			this->panel1->PerformLayout();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->pictureBox1))->EndInit();
 			this->ResumeLayout(false);
-			this->PerformLayout();
 
 		}
 		
@@ -665,7 +680,7 @@ namespace sPrintManager {
 
 				int index =(std::find(currentJobs->begin(), currentJobs->end(), jobs.at(i).at(0)))- currentJobs->begin();
 				int size = currentJobs->size()-1;
-
+				
 				//if job's index is greater than size of job list, new job has come
 				if(index>size)
 				{
@@ -715,6 +730,7 @@ namespace sPrintManager {
 			string currentPrinter;
 			MarshalString(comboBox1->Text,currentPrinter);	
 			controller->refreshSelectedPrinterEvent(currentPrinter);
+
 		}
 
 		if(GC::GetTotalMemory(NULL)>30000)
