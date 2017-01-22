@@ -456,23 +456,24 @@ bool PrinterManager::CollateJobs(PRINTER_INFO_2 printer, std::string user, std::
 //*tested on local printer
 bool PrinterManager::UnpausePrinter( LPTSTR szPrinterName )	
 {
-		std::map<LPTSTR, HANDLE>::iterator it = PrinterHandles.find(szPrinterName);
-		HANDLE         hPrinter = it->second;
+		//std::map<LPTSTR, HANDLE>::iterator it = PrinterHandles.at(szPrinterName);
+		HANDLE         hPrinter = PrinterHandles.at(szPrinterName);
 		
 		bool result = SetPrinter(hPrinter, 0, NULL, PRINTER_CONTROL_RESUME);
 
 		if(result == 0 )	{
 				std::cout<<"Error: Failed to unpause printer with error code: "<<GetLastError()<<std::endl;
 		}
-
+		CloseHandle(hPrinter);
 		return result;
 }
 
 //*tested on local printer
 bool PrinterManager::PausePrinter( LPTSTR szPrinterName )	
 {
-		std::map<LPTSTR, HANDLE>::iterator it = PrinterHandles.find(szPrinterName);
-		HANDLE         hPrinter = it->second;
+
+		//std::map<LPTSTR, HANDLE>::iterator it = PrinterHandles.at(szPrinterName);
+		HANDLE         hPrinter = PrinterHandles.at(szPrinterName);
 
 		//cout<<"handle"<<it->first<<hPrinter<<endl;
 		bool result = SetPrinter(hPrinter, 0, NULL, PRINTER_CONTROL_PAUSE);
@@ -480,8 +481,8 @@ bool PrinterManager::PausePrinter( LPTSTR szPrinterName )
 		if(result == 0 )	{
 				std::cout<<"Error: Failed to pause printer with error code: "<<GetLastError()<<std::endl;
 		}
-
-	 return result;
+		CloseHandle(hPrinter);
+		return result;
 }
 
 bool PrinterManager::startJob(LPTSTR szPrinterName, DWORD JobID, int action)

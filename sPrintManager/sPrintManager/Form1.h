@@ -7,10 +7,11 @@
 #include "confirmFlushPrinter.h"
 #include "PrinterManager.h"
 #include "FormController.h"
-
+#include <stdlib.h>
+#include <msclr\marshal_cppstd.h>
 
 using namespace std; 
-
+using namespace msclr::interop;  
 
 namespace sPrintManager {
 
@@ -38,7 +39,7 @@ namespace sPrintManager {
 		FormController* controller;
 		vector<string>* currentJobs;
 	
-	private: System::Windows::Forms::Button^  button7;
+
 			 vector<int>* deletedJobs;
 	private: System::Windows::Forms::PictureBox^  pictureBox1;
 	public:
@@ -157,7 +158,6 @@ namespace sPrintManager {
 			this->label4 = (gcnew System::Windows::Forms::Label());
 			this->label3 = (gcnew System::Windows::Forms::Label());
 			this->button6 = (gcnew System::Windows::Forms::Button());
-			this->button7 = (gcnew System::Windows::Forms::Button());
 			this->panel1->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->pictureBox1))->BeginInit();
 			this->SuspendLayout();
@@ -449,23 +449,11 @@ namespace sPrintManager {
 			this->button6->UseVisualStyleBackColor = true;
 			this->button6->Click += gcnew System::EventHandler(this, &Form1::button6_Click);
 			// 
-			// button7
-			// 
-			this->button7->Anchor = System::Windows::Forms::AnchorStyles::Top;
-			this->button7->Location = System::Drawing::Point(937, 65);
-			this->button7->Name = L"button7";
-			this->button7->Size = System::Drawing::Size(100, 23);
-			this->button7->TabIndex = 11;
-			this->button7->Text = L"Flush Printer";
-			this->button7->UseVisualStyleBackColor = true;
-			this->button7->Click += gcnew System::EventHandler(this, &Form1::button7_Click);
-			// 
 			// Form1
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(1049, 433);
-			this->Controls->Add(this->button7);
 			this->Controls->Add(this->button6);
 			this->Controls->Add(this->panel1);
 			this->Controls->Add(this->listView1);
@@ -502,7 +490,7 @@ namespace sPrintManager {
 		//indicate connection
 		this->label3->Text = "This Computer";		
 
-		controller->runBlockerThreads();
+		//controller->runBlockerThreads();
 	}
 
 	private: vector<int> getSelectedJobs()
@@ -638,7 +626,7 @@ namespace sPrintManager {
 		ss << sum;
 		
 		//update the total pages label
-		String^ totalPages = gcnew String(ss.str().c_str());
+		String^ totalPages = marshal_as<String^>(ss.str().c_str());
 		this->label2->Text = totalPages;
 	}
 
@@ -654,14 +642,14 @@ namespace sPrintManager {
 			stringstream s;
 			s<<pStatus;
 
-			this->label8->Text = gcnew System::String(s.str().c_str());
-			
 			if(pStatus.compare("PAUSED")==0) 
 			{
+				this->label8->Text = "PAUSED";
 				this->listView1->BackColor = System::Drawing::Color::LightGray;
 			}
 			else if(pStatus.compare("READY")==0)
 			{
+				this->label8->Text = "READY";
 				this->listView1->BackColor = System::Drawing::Color::White;
 			}
 			
@@ -676,6 +664,7 @@ namespace sPrintManager {
 			//get current printer jobs
 			vector<vector<string>> jobs = controller->getPrinterJobEvent();
 			vector<string> jobIDs;
+			
 			for (int i=0;i<jobs.size();i++) {
 
 				int index =(std::find(currentJobs->begin(), currentJobs->end(), jobs.at(i).at(0)))- currentJobs->begin();
@@ -689,9 +678,9 @@ namespace sPrintManager {
 
 					for(int j=0;j<jobs.at(i).size()-1;j++)
 					{	
-						newData[j] =  gcnew String(jobs.at(i).at(j+1).c_str());							
+						newData[j] =  marshal_as<String^>(jobs.at(i).at(j+1).c_str());							
 					}
-					ListViewItem^ newItem = gcnew ListViewItem(gcnew String(jobs.at(i).at(0).c_str()));
+					ListViewItem^ newItem = gcnew ListViewItem(marshal_as<String^>(jobs.at(i).at(0).c_str()));
 					newItem->SubItems->AddRange(newData);
 					listView1->Items->Add(newItem);
 					//push to currentjobs
@@ -704,7 +693,12 @@ namespace sPrintManager {
 					{	
 						if(listView1->Items->Count>0)
 						{
-							listView1->Items[index]->SubItems[j+1]->Text = gcnew String(jobs.at(i).at(j+1).c_str());	
+							string convert = msclr::interop::marshal_as<std::string>(listView1->Items[index]->SubItems[j+1]->Text);
+							if(convert.compare(jobs.at(i).at(j+1))!=0)
+							{
+								listView1->Items[index]->SubItems[j+1]->Text = marshal_as<String^>(jobs.at(i).at(j+1));	
+
+							}
 						}
 												
 					}			
@@ -723,20 +717,22 @@ namespace sPrintManager {
 				}
 			}
 			jobIDs.clear();
+			
 			jobs.clear();
 			
 			//refresh current selected printer
 
 			string currentPrinter;
 			MarshalString(comboBox1->Text,currentPrinter);	
-			controller->refreshSelectedPrinterEvent(currentPrinter);
+			//controller->refreshSelectedPrinterEvent(currentPrinter);
 
 		}
-
+		/*
 		if(GC::GetTotalMemory(NULL)>30000)
 		{
-			GC::Collect();
+			//GC::Collect();
 		}
+		*/
 
 	}
 		 //SELECT ALL JOBS BUTTON
